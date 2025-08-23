@@ -5,7 +5,7 @@
   - Tables: User, Customer, Menu, Order, Order_Item, Payment, Audit_Log
   - Add relationships (PK, FK)
   - Seed sample data (menu items, test users, dummy orders)
-- Status: ✅ Done / 🔄 In Progress / ❌ Not Started
+- Status: 
 
 ---
 
@@ -16,7 +16,7 @@
 - [ ] Add RBAC (roles: Admin, Cashier)
 - [ ] Implement Audit Log (auto-record actions)
 - [ ] Unit test for API endpoints
-- Status: ✅ Done / 🔄 In Progress / ❌ Not Started
+- Status:  ❌ Not Started
 
 ---
 
@@ -25,7 +25,7 @@
 - [ ] Cashier Dashboard (view/update orders, process payments)
 - [ ] Admin Panel (manage menu, users, audit logs)
 - [ ] Connect APIs using Axios/Fetch
-- Status: ✅ Done / 🔄 In Progress / ❌ Not Started
+- Status:  ❌ Not Started
 
 ---
 
@@ -34,7 +34,7 @@
 - [ ] Improve UI design (Tailwind or Bootstrap)
 - [ ] Add accessibility (labels, alt texts, ARIA attributes)
 - [ ] Polish cashier/admin dashboard
-- Status: ✅ Done / 🔄 In Progress / ❌ Not Started
+- Status:  ❌ Not Started
 
 ---
 
@@ -43,7 +43,7 @@
 - [ ] Generate sales forecasts (daily/weekly trends)
 - [ ] Show results in charts (Recharts/Chart.js)
 - [ ] Evaluate model using MAE/MSE
-- Status: ✅ Done / 🔄 In Progress / ❌ Not Started
+- Status:  ❌ Not Started
 
 ---
 
@@ -52,7 +52,7 @@
 - [ ] Fix bugs & performance issues
 - [ ] Deploy on local server (XAMPP/Laragon)
 - [ ] Prepare demo dataset & accounts
-- Status: ✅ Done / 🔄 In Progress / ❌ Not Started
+- Status:  ❌ Not Started
 
 ---
 

@@ -14,7 +14,8 @@ This system is designed for small restaurants to simplify and modernize their op
 
 ### 1. QR Code Ordering  
 - Customers scan a QR code using their phone.  
-- They can select menu items, quantity, and table number.  
+- then some details will be inserted in the web once the qr was scanned such as table number so they dont need to manual input table
+- They can select menu items, quantity.  
 - Order is automatically saved in the system.  
 
 ### 2. Cashier-Assisted Ordering  
@@ -28,7 +29,7 @@ This system is designed for small restaurants to simplify and modernize their op
 
 ### 4. Inventory & Menu Management  
 - Admin manages menu items (add, update, delete).  
-- Product details stored (ingredients, SKU, shelf life).  
+- Product details stored   
 - Inventory auto-updates whenever orders are placed.  
 
 ### 5. Predictive Analytics  
