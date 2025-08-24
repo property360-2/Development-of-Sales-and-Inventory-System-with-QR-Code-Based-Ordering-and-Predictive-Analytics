@@ -1,23 +1,22 @@
 # 🛠 Developmental Plan (version ko)
 
 ## 1. Database Setup (Week 1)
-- [x] Create full database schema in XAMPP (MySQL)
+- [√] Create full database schema in XAMPP (MySQL)
   - Tables: User, Customer, Menu, Order, Order_Item, Payment, Audit_Log
   - Add relationships (PK, FK)
   - Seed sample data (menu items, test users, dummy orders)
-- Status: 
+- Status: FINISHEDDDDDDDDDDDDDDDD.
 
 ---
 
 ## 2. Backend Development (Laravel) (Week 2–3)
-- [ ] Setup Laravel project
-- [ ] Create models & migrations for all tables
-- [ ] Implement controllers & routes (CRUD)
+- [√] Setup Laravel project
+- [√] Create models & migrations for all tables
+- [] Implement controllers & routes (CRUD)
 - [ ] Add RBAC (roles: Admin, Cashier)
 - [ ] Implement Audit Log (auto-record actions)
 - [ ] Unit test for API endpoints
-- Status:  ❌ Not Started
-
+- Status:  in Progress
 ---
 
 ## 3. Frontend Development (React.js) (Week 4–5)
