@@ -1,0 +1,173 @@
+{
+    "info": {
+        "name": "Restaurant API RBAC",
+        "_postman_id": "rbac-collection-001",
+        "description": "RBAC testing: Admin vs Cashier flows",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Login",
+            "item": [
+                {
+                    "name": "Admin Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+                        },
+                        "url": "{{base_url}}/login"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cashier Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"cashier\",\n  \"password\": \"cashier123\"\n}"
+                        },
+                        "url": "{{base_url}}/login"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin Flow",
+            "item": [
+                {
+                    "name": "Get Menus (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/menus"
+                    }
+                },
+                {
+                    "name": "Create Menu (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cheeseburger\",\n  \"description\": \"Juicy beef patty with melted cheese\",\n  \"price\": 150.00,\n  \"category\": \"Food\",\n  \"availability_status\": true,\n  \"product_details\": \"Served with fries and a soft drink\"\n}"
+                        },
+                        "url": "{{base_url}}/menus"
+                    }
+                },
+                {
+                    "name": "Get Users (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/users"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Cashier Flow",
+            "item": [
+                {
+                    "name": "Get Menus (Cashier) - read-only",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/menus"
+                    }
+                },
+                {
+                    "name": "Create Menu (Cashier) - forbidden",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Cheeseburger\",\n  \"price\": 150,\n  \"category\": \"Food\",\n  \"availability_status\": true\n}"
+                        },
+                        "url": "{{base_url}}/menus"
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Cashier cannot create menu', function () {",
+                                    "    pm.response.to.have.status(403);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Orders (Cashier) - allowed",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/orders"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+        { "key": "admin_token", "value": "" },
+        { "key": "cashier_token", "value": "" }
+    ]
+}
