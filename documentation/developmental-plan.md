@@ -19,8 +19,8 @@
 - [√] test the routes with postman(runner sequence para di masakit sa ulo)  
 - [√] **Add RBAC (roles: Admin, Cashier)** ✅ Security checkpoint: enforce role-based access on all sensitive routes, i used middleware saka doon sa routers
 - [√] test the role based sa post man  
-- [ ] **Input validation & sanitization** ✅ Security checkpoint: prevent SQL injection, XSS via request validation  
-- [ ] **Middleware & authentication (auth:sanctum)** ✅ Security checkpoint: only authenticated users can access protected routes  
+- [√] **Input validation & sanitization** ✅ Security checkpoint: prevent SQL injection, XSS via request validation 
+- [√] **Middleware & authentication (auth:sanctum)** ✅ Security checkpoint: only authenticated users can access protected routes 
 - [ ] **Implement Audit Log (auto-record actions)** ✅ Security checkpoint: track who did what  
 - [ ] **Unit test for API endpoints** ✅ Include security tests for forbidden actions and invalid tokens  
 - [ ] **Performance checks** ✅ Use eager loading where necessary, optimize queries  

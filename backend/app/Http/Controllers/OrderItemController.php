@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use App\Http\Requests\Store\StoreOrderItemRequest;
+use App\Http\Requests\Update\UpdateOrderItemRequest;
 
 class OrderItemController extends Controller
 {
@@ -16,21 +18,6 @@ class OrderItemController extends Controller
         return response()->json($orderItems);
     }
 
-    /**
-     * Store a newly created order item.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'order_id' => 'required|exists:orders,order_id',
-            'menu_id' => 'required|exists:menus,menu_id',
-            'quantity' => 'required|integer|min:1',
-            'price' => 'required|numeric',
-        ]);
-
-        $orderItem = OrderItem::create($request->all());
-        return response()->json($orderItem, 201);
-    }
 
     /**
      * Display a specific order item with related order and menu.
@@ -40,24 +27,19 @@ class OrderItemController extends Controller
         $orderItem = OrderItem::with(['order', 'menu'])->findOrFail($id);
         return response()->json($orderItem);
     }
-
-    /**
-     * Update an existing order item.
-     */
-    public function update(Request $request, $id)
+    public function store(StoreOrderItemRequest $request)
     {
-        $orderItem = OrderItem::findOrFail($id);
-
-        $request->validate([
-            'order_id' => 'sometimes|exists:orders,order_id',
-            'menu_id' => 'sometimes|exists:menus,menu_id',
-            'quantity' => 'sometimes|integer|min:1',
-            'price' => 'sometimes|numeric',
-        ]);
-
-        $orderItem->update($request->all());
-        return response()->json($orderItem);
+        $item = OrderItem::create($request->validated());
+        return response()->json($item, 201);
     }
+
+    public function update(UpdateOrderItemRequest $request, $id)
+    {
+        $item = OrderItem::findOrFail($id);
+        $item->update($request->validated());
+        return response()->json($item);
+    }
+
 
     /**
      * Remove an order item from the database.

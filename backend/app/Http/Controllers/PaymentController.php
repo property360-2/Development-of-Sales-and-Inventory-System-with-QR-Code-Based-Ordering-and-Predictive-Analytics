@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use App\Http\Requests\Store\StorePaymentRequest;
+use App\Http\Requests\Update\UpdatePaymentRequest;
 
 class PaymentController extends Controller
 {
@@ -16,22 +18,6 @@ class PaymentController extends Controller
         return response()->json($payments);
     }
 
-    /**
-     * Store a newly created payment.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'order_id' => 'required|exists:orders,order_id',
-            'amount_paid' => 'required|numeric',
-            'payment_method' => 'required|in:cash,gcash,card',
-            'payment_status' => 'required|in:pending,completed,failed',
-            'payment_timestamp' => 'nullable|date',
-        ]);
-
-        $payment = Payment::create($request->all());
-        return response()->json($payment, 201);
-    }
 
     /**
      * Display a specific payment with related order.
@@ -42,24 +28,19 @@ class PaymentController extends Controller
         return response()->json($payment);
     }
 
-    /**
-     * Update an existing payment.
-     */
-    public function update(Request $request, $id)
+    public function store(StorePaymentRequest $request)
+    {
+        $payment = Payment::create($request->validated());
+        return response()->json($payment, 201);
+    }
+
+    public function update(UpdatePaymentRequest $request, $id)
     {
         $payment = Payment::findOrFail($id);
-
-        $request->validate([
-            'order_id' => 'sometimes|exists:orders,order_id',
-            'amount_paid' => 'sometimes|numeric',
-            'payment_method' => 'sometimes|in:cash,gcash,card',
-            'payment_status' => 'sometimes|in:pending,completed,failed',
-            'payment_timestamp' => 'sometimes|date',
-        ]);
-
-        $payment->update($request->all());
+        $payment->update($request->validated());
         return response()->json($payment);
     }
+
 
     /**
      * Remove a payment from the database.

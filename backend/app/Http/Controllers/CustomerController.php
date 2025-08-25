@@ -4,61 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Http\Requests\Store\StoreCustomerRequest;
+use App\Http\Requests\Update\UpdateCustomerRequest;
 
 class CustomerController extends Controller
 {
     /**
-     * Display a listing of all customers.
+     * Display all customers
      */
     public function index()
     {
-        $customers = Customer::all();
-        return response()->json($customers);
+        return response()->json(Customer::all());
     }
 
     /**
-     * Store a newly created customer in the database.
+     * Store a new customer
      */
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
-        $request->validate([
-            'customer_name' => 'nullable|string|max:100',
-            'table_number' => 'required|string|max:20',
-            'order_reference' => 'required|string|max:50|unique:customers,order_reference',
-        ]);
-
-        $customer = Customer::create($request->all());
+        // validated() = clean, validated data
+        $customer = Customer::create($request->validated());
         return response()->json($customer, 201);
     }
 
     /**
-     * Display a specific customer.
+     * Show specific customer
      */
     public function show($id)
     {
-        $customer = Customer::findOrFail($id);
-        return response()->json($customer);
+        return response()->json(Customer::findOrFail($id));
     }
 
     /**
-     * Update an existing customer.
+     * Update existing customer
      */
-    public function update(Request $request, $id)
+    public function update(UpdateCustomerRequest $request, $id)
     {
         $customer = Customer::findOrFail($id);
-
-        $request->validate([
-            'customer_name' => 'sometimes|string|max:100',
-            'table_number' => 'sometimes|string|max:20',
-            'order_reference' => 'sometimes|string|max:50|unique:customers,order_reference,'.$id.',customer_id',
-        ]);
-
-        $customer->update($request->all());
+        $customer->update($request->validated());
         return response()->json($customer);
     }
 
     /**
-     * Remove a customer from the database.
+     * Delete a customer
      */
     public function destroy($id)
     {

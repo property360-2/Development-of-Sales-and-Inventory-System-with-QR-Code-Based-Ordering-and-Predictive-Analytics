@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use App\Http\Requests\Store\StoreMenuRequest;
+use App\Http\Requests\Update\UpdateMenuRequest;
 
 class MenuController extends Controller
 {
@@ -16,23 +18,6 @@ class MenuController extends Controller
         return response()->json($menus); // Return the records as a JSON response
     }
 
-    // Create a new menu
-    // POST /menus
-    // Validates request data and creates a new menu item in the database
-    public function store(Request $request)
-    {
-        // Validate incoming request data
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'price' => 'required|numeric',
-            'category' => 'required|string|max:50',
-            'availability_status' => 'required|boolean',
-        ]);
-
-        // Create the menu item with validated data
-        $menu = Menu::create($request->all());
-        return response()->json($menu, 201); // Return the created menu with HTTP status 201
-    }
 
     // Show a single menu item
     // GET /menus/{id}
@@ -43,23 +28,24 @@ class MenuController extends Controller
         return response()->json($menu);
     }
 
+
+    // Create a new menu
+    // POST /menus
+    // Validates request data and creates a new menu item in the database
+    public function store(StoreMenuRequest $request)
+    {
+        $menu = Menu::create($request->validated());
+        return response()->json($menu, 201);
+    }
     // Update a menu
     // PUT/PATCH /menus/{id}
     // Updates a menu item with the provided request data
-    public function update(Request $request, $id)
+
+    public function update(UpdateMenuRequest $request, $id)
     {
-        $menu = Menu::findOrFail($id); // Find menu by ID or return 404 if not found
-
-        // Validate incoming request data (fields are optional)
-        $request->validate([
-            'name' => 'sometimes|string|max:100',
-            'price' => 'sometimes|numeric',
-            'category' => 'sometimes|string|max:50',
-            'availability_status' => 'sometimes|boolean',
-        ]);
-
-        $menu->update($request->all()); // Update the menu item with provided data
-        return response()->json($menu); // Return updated menu item as JSON
+        $menu = Menu::findOrFail($id);
+        $menu->update($request->validated());
+        return response()->json($menu);
     }
 
     // Delete a menu
