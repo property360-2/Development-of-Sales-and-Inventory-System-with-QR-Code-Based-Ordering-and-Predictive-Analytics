@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AuditLog; // make sure this exists
+use Illuminate\Support\Facades\Auth;
 
 class Order extends Model
 {
@@ -39,5 +41,34 @@ class Order extends Model
 
     public function payments() {
         return $this->hasMany(Payment::class, 'order_id');
+    }
+    
+    // ----- Audit Logging -----
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            AuditLog::create([
+                'user_id' => Auth::id() ?? 0, // 0 for system actions
+                'action' => 'Created Order ID: '.$order->order_id,
+                'timestamp' => now(),
+            ]);
+        });
+
+        static::updated(function ($order) {
+            $changes = $order->getChanges(); // only changed fields
+            AuditLog::create([
+                'user_id' => Auth::id() ?? 0,
+                'action' => 'Updated Order ID: '.$order->order_id.' | Changes: '.json_encode($changes),
+                'timestamp' => now(),
+            ]);
+        });
+
+        static::deleted(function ($order) {
+            AuditLog::create([
+                'user_id' => Auth::id() ?? 0,
+                'action' => 'Deleted Order ID: '.$order->order_id,
+                'timestamp' => now(),
+            ]);
+        });
     }
 }

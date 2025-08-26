@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\Store\StoreCustomerRequest;
 use App\Http\Requests\Update\UpdateCustomerRequest;
@@ -14,7 +16,21 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return response()->json(Customer::all());
+        $customers = Customer::all();
+
+        // Log "view all" action
+        $userId = Auth::id();
+if (!$userId) {
+    abort(403, 'Unauthorized'); // don’t log anything if no user
+}
+
+AuditLog::create([
+    'user_id' => $userId,
+    'action' => 'Viewed all menus',
+    'timestamp' => now(),
+]);
+
+        return response()->json($customers);
     }
 
     /**
@@ -22,7 +38,6 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        // validated() = clean, validated data
         $customer = Customer::create($request->validated());
         return response()->json($customer, 201);
     }
@@ -32,7 +47,21 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        return response()->json(Customer::findOrFail($id));
+        $customer = Customer::findOrFail($id);
+
+        $userId = Auth::id();
+        if (!$userId) {
+            abort(403, 'Unauthorized'); // don’t log anything if no user
+        }
+
+        AuditLog::create([
+            'user_id' => $userId,
+            'action' => 'Viewed all menus',
+            'timestamp' => now(),
+        ]);
+
+
+        return response()->json($customer);
     }
 
     /**
@@ -50,7 +79,8 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        Customer::destroy($id);
+        $customer = Customer::findOrFail($id);
+        $customer->delete();
         return response()->json(null, 204);
     }
 }

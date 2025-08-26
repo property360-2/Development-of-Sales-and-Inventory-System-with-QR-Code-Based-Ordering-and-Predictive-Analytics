@@ -10,12 +10,14 @@ class UpdateMenuRequest extends FormRequest
     {
         return true;
     }
-     protected function prepareForValidation()
+    protected function prepareForValidation()
     {
         $this->merge([
             'name' => $this->name ? trim(strip_tags($this->name)) : null,
             'description' => $this->description ? trim(strip_tags($this->description)) : null,
             'category' => $this->category ? trim(strip_tags($this->category)) : null,
+            'availability_status' => $this->has('availability_status') ? (bool) $this->availability_status : null,
+
         ]);
     }
 

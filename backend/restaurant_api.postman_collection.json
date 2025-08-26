@@ -1,8 +1,8 @@
 {
     "info": {
-        "name": "Restaurant API RBAC",
-        "_postman_id": "rbac-collection-001",
-        "description": "RBAC testing: Admin vs Cashier flows",
+        "name": "Restaurant API Full CRUD",
+        "_postman_id": "restaurant-api-full-002",
+        "description": "Complete CRUD Postman collection for Sales & Inventory System with QR Code Ordering and RBAC",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -21,11 +21,10 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+                            "raw": "{ \"username\": \"admin\", \"password\": \"admin123\" }"
                         },
                         "url": "{{base_url}}/login"
-                    },
-                    "response": []
+                    }
                 },
                 {
                     "name": "Cashier Login",
@@ -39,11 +38,10 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"username\": \"cashier\",\n  \"password\": \"cashier123\"\n}"
+                            "raw": "{ \"username\": \"cashier1\", \"password\": \"password123\" }"
                         },
                         "url": "{{base_url}}/login"
-                    },
-                    "response": []
+                    }
                 }
             ]
         },
@@ -51,41 +49,7 @@
             "name": "Admin Flow",
             "item": [
                 {
-                    "name": "Get Menus (Admin)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/menus"
-                    }
-                },
-                {
-                    "name": "Create Menu (Admin)",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"name\": \"Cheeseburger\",\n  \"description\": \"Juicy beef patty with melted cheese\",\n  \"price\": 150.00,\n  \"category\": \"Food\",\n  \"availability_status\": true,\n  \"product_details\": \"Served with fries and a soft drink\"\n}"
-                        },
-                        "url": "{{base_url}}/menus"
-                    }
-                },
-                {
-                    "name": "Get Users (Admin)",
+                    "name": "Get Users",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -96,6 +60,262 @@
                         ],
                         "url": "{{base_url}}/users"
                     }
+                },
+                {
+                    "name": "Show User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/users/1"
+                    }
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"name\": \"Cashier 2\", \"username\": \"cashier2\", \"password\": \"password123\", \"role\": \"Cashier\", \"contact_number\": \"09171234569\" }"
+                        },
+                        "url": "{{base_url}}/users"
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"name\": \"Updated Admin\", \"contact_number\": \"09170000000\" }"
+                        },
+                        "url": "{{base_url}}/users/1"
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/users/1"
+                    }
+                },
+                {
+                    "name": "Get Menus",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/menus"
+                    }
+                },
+                {
+                    "name": "Show Menu",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/menus/1"
+                    }
+                },
+                {
+                    "name": "Create Menu",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"name\": \"Cheeseburger\", \"description\": \"Juicy beef patty with melted cheese\", \"price\": 150.00, \"category\": \"Food\", \"availability_status\": true, \"product_details\": \"Served with fries and soft drink\" }"
+                        },
+                        "url": "{{base_url}}/menus"
+                    }
+                },
+                {
+                    "name": "Update Menu",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"price\": 200.00, \"availability_status\": false }"
+                        },
+                        "url": "{{base_url}}/menus/1"
+                    }
+                },
+                {
+                    "name": "Delete Menu",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/menus/1"
+                    }
+                },
+                {
+                    "name": "Get Customers",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/customers"
+                    }
+                },
+                {
+                    "name": "Show Customer",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/customers/1"
+                    }
+                },
+                {
+                    "name": "Create Customer",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"customer_name\": \"Test Customer\", \"table_number\": \"A1\", \"order_reference\": \"REF123\" }"
+                        },
+                        "url": "{{base_url}}/customers"
+                    }
+                },
+                {
+                    "name": "Update Customer",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"customer_name\": \"Updated Customer\" }"
+                        },
+                        "url": "{{base_url}}/customers/1"
+                    }
+                },
+                {
+                    "name": "Delete Customer",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/customers/1"
+                    }
+                },
+                {
+                    "name": "Get Orders",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/orders"
+                    }
+                },
+                {
+                    "name": "Get Audit Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/audit-logs"
+                    }
                 }
             ]
         },
@@ -103,7 +323,7 @@
             "name": "Cashier Flow",
             "item": [
                 {
-                    "name": "Get Menus (Cashier) - read-only",
+                    "name": "Get Menus",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -116,7 +336,7 @@
                     }
                 },
                 {
-                    "name": "Create Menu (Cashier) - forbidden",
+                    "name": "Create Order",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -131,26 +351,13 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"name\": \"Cheeseburger\",\n  \"price\": 150,\n  \"category\": \"Food\",\n  \"availability_status\": true\n}"
+                            "raw": "{ \"customer_id\": 1, \"handled_by\": 2, \"order_type\": \"dine-in\", \"status\": \"pending\", \"total_amount\": 150.00, \"order_timestamp\": \"2025-08-26T12:00:00\", \"expiry_timestamp\": \"2025-08-26T13:00:00\", \"order_source\": \"QR\" }"
                         },
-                        "url": "{{base_url}}/menus"
-                    },
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "exec": [
-                                    "pm.test('Cashier cannot create menu', function () {",
-                                    "    pm.response.to.have.status(403);",
-                                    "});"
-                                ],
-                                "type": "text/javascript"
-                            }
-                        }
-                    ]
+                        "url": "{{base_url}}/orders"
+                    }
                 },
                 {
-                    "name": "Get Orders (Cashier) - allowed",
+                    "name": "Show Order",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -159,7 +366,109 @@
                                 "value": "Bearer {{cashier_token}}"
                             }
                         ],
-                        "url": "{{base_url}}/orders"
+                        "url": "{{base_url}}/orders/1"
+                    }
+                },
+                {
+                    "name": "Update Order",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"status\": \"preparing\" }"
+                        },
+                        "url": "{{base_url}}/orders/1"
+                    }
+                },
+                {
+                    "name": "Delete Order",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/orders/1"
+                    }
+                },
+                {
+                    "name": "Create Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"order_id\": 1, \"amount_paid\": 150.00, \"payment_method\": \"cash\", \"payment_status\": \"completed\", \"payment_timestamp\": \"2025-08-26T12:05:00\" }"
+                        },
+                        "url": "{{base_url}}/payments"
+                    }
+                },
+                {
+                    "name": "Show Payment",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/payments/1"
+                    }
+                },
+                {
+                    "name": "Update Payment",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"payment_status\": \"refunded\" }"
+                        },
+                        "url": "{{base_url}}/payments/1"
+                    }
+                },
+                {
+                    "name": "Delete Payment",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{cashier_token}}"
+                            }
+                        ],
+                        "url": "{{base_url}}/payments/1"
                     }
                 }
             ]

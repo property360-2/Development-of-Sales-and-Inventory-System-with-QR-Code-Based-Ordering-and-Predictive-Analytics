@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Store\StoreUserRequest;
 use App\Http\Requests\Update\UpdateUserRequest;
 
@@ -15,20 +17,30 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
+
+        // Audit log for viewing all users
+        $userId = Auth::id();
+        if ($userId) {
+            AuditLog::create([
+                'user_id' => $userId,
+                'action' => 'Viewed all users',
+                'timestamp' => now(),
+            ]);
+        }
+
         return response()->json($users);
     }
 
     /**
      * Store a newly created user.
+     * No need for audit log here since model handles 'created'.
      */
     public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
-
-        // Always hash the password before saving
         $data['password'] = Hash::make($data['password']);
-
         $user = User::create($data);
+
         return response()->json($user, 201);
     }
 
@@ -38,28 +50,39 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
+
+        // Audit log for viewing a specific user
+        $userId = Auth::id();
+        if ($userId) {
+            AuditLog::create([
+                'user_id' => $userId,
+                'action' => 'Viewed User ID: ' . $user->user_id,
+                'timestamp' => now(),
+            ]);
+        }
+
         return response()->json($user);
     }
 
     /**
      * Update an existing user.
+     * No audit log here; model handles 'updated'.
      */
     public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
         $data = $request->validated();
-
-        // Only hash password if provided
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
-
         $user->update($data);
+
         return response()->json($user);
     }
 
     /**
      * Remove a user from the database.
+     * No audit log here; model handles 'deleted'.
      */
     public function destroy($id)
     {
