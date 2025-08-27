@@ -23,7 +23,7 @@
 - [√] **Input validation & sanitization** ✅ Security checkpoint: prevent SQL injection, XSS via request validation 
 - [√] 2nd batch testing (sanitization,validation)
 - [√] **Implement Audit Log (auto-record actions)** ✅ Security checkpoint: track who did what (in proggress some backend function are buggy)  
-- [ ] **Unit test for API endpoints** ✅ Include security tests for forbidden actions and invalid tokens  
+- [√] **Unit test for API endpoints** ✅ Include security tests for forbidden actions and invalid tokens  
 - [ ] **Performance checks** ✅ Use eager loading where necessary, optimize queries  
 - Status: in Progress
 - Notes: added installed sanctum, api
