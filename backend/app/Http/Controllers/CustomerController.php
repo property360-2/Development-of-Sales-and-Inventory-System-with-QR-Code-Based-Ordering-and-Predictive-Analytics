@@ -20,15 +20,15 @@ class CustomerController extends Controller
 
         // Log "view all" action
         $userId = Auth::id();
-if (!$userId) {
-    abort(403, 'Unauthorized'); // don’t log anything if no user
-}
+        if (!$userId) {
+            abort(403, 'Unauthorized'); // don’t log anything if no user
+        }
 
-AuditLog::create([
-    'user_id' => $userId,
-    'action' => 'Viewed all menus',
-    'timestamp' => now(),
-]);
+        AuditLog::create([
+            'user_id' => $userId,
+            'action' => 'Viewed all menus',
+            'timestamp' => now(),
+        ]);
 
         return response()->json($customers);
     }

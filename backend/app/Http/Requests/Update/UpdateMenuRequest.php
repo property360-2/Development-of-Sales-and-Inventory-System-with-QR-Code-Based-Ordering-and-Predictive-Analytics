@@ -10,15 +10,37 @@ class UpdateMenuRequest extends FormRequest
     {
         return true;
     }
+
     protected function prepareForValidation()
     {
-        $this->merge([
-            'name' => $this->name ? trim(strip_tags($this->name)) : null,
-            'description' => $this->description ? trim(strip_tags($this->description)) : null,
-            'category' => $this->category ? trim(strip_tags($this->category)) : null,
-            'availability_status' => $this->has('availability_status') ? (bool) $this->availability_status : null,
+        $data = [];
 
-        ]);
+        if ($this->has('name')) {
+            $data['name'] = trim(strip_tags($this->name));
+        }
+
+        if ($this->has('description')) {
+            $data['description'] = trim(strip_tags($this->description));
+        }
+
+        if ($this->has('category')) {
+            $data['category'] = trim(strip_tags($this->category));
+        }
+
+        if ($this->has('price')) {
+            $data['price'] = $this->price;
+        }
+
+        if ($this->has('product_details')) {
+            $data['product_details'] = trim(strip_tags($this->product_details));
+        }
+
+        if ($this->has('availability_status')) {
+            // Cast to tinyint (0 or 1) instead of boolean
+            $data['availability_status'] = (int) $this->availability_status;
+        }
+
+        $this->merge($data);
     }
 
     public function rules(): array
@@ -28,7 +50,7 @@ class UpdateMenuRequest extends FormRequest
             'description' => 'sometimes|nullable|string',
             'price' => 'sometimes|numeric|min:0',
             'category' => 'sometimes|string|max:50',
-            'availability_status' => 'sometimes|boolean',
+            'availability_status' => 'sometimes|integer|in:0,1',
             'product_details' => 'sometimes|nullable|string',
         ];
     }
@@ -38,7 +60,8 @@ class UpdateMenuRequest extends FormRequest
         return [
             'name.string' => 'Menu name must be text.',
             'price.numeric' => 'Price must be a valid number.',
-            'availability_status.boolean' => 'Availability status must be true or false.',
+            'availability_status.integer' => 'Availability status must be 0 or 1.',
+            'availability_status.in' => 'Availability status must be 0 (unavailable) or 1 (available).',
         ];
     }
 }

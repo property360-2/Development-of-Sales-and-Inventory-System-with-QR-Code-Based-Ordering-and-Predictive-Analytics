@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\AuditLog; // make sure this exists
+use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 
 class Order extends Model
@@ -26,49 +26,65 @@ class Order extends Model
         'order_source',
     ];
 
+    // Cast timestamps properly
+    protected $casts = [
+        'order_timestamp' => 'datetime',
+        'expiry_timestamp' => 'datetime',
+    ];
+
     // Relationships
-    public function customer() {
+    public function customer()
+    {
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class, 'handled_by');
     }
 
-    public function items() {
+    public function items()
+    {
         return $this->hasMany(OrderItem::class, 'order_id');
     }
 
-    public function payments() {
+    public function payments()
+    {
         return $this->hasMany(Payment::class, 'order_id');
     }
-    
+
     // ----- Audit Logging -----
     protected static function booted()
     {
         static::created(function ($order) {
+            $userId = Auth::id(); // get authenticated user
             AuditLog::create([
-                'user_id' => Auth::id() ?? 0, // 0 for system actions
-                'action' => 'Created Order ID: '.$order->order_id,
+                'user_id' => $userId, // nullable if no user
+                'action' => 'Created Order ID: ' . $order->order_id,
                 'timestamp' => now(),
             ]);
         });
 
         static::updated(function ($order) {
-            $changes = $order->getChanges(); // only changed fields
+            $userId = Auth::id(); // get authenticated user
+            $changes = $order->getChanges();
+
+            // Only log if there's a valid user or make user_id nullable in audit_logs
             AuditLog::create([
-                'user_id' => Auth::id() ?? 0,
-                'action' => 'Updated Order ID: '.$order->order_id.' | Changes: '.json_encode($changes),
+                'user_id' => $userId,
+                'action' => 'Updated Order ID: ' . $order->order_id . ' | Changes: ' . json_encode($changes),
                 'timestamp' => now(),
             ]);
         });
 
         static::deleted(function ($order) {
+            $userId = Auth::id();
             AuditLog::create([
-                'user_id' => Auth::id() ?? 0,
-                'action' => 'Deleted Order ID: '.$order->order_id,
+                'user_id' => $userId,
+                'action' => 'Deleted Order ID: ' . $order->order_id,
                 'timestamp' => now(),
             ]);
         });
     }
+
 }

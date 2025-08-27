@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:Admin')->group(function () {
         Route::apiResource('menus', MenuController::class);
         Route::apiResource('users', UserController::class);
+        Route::apiResource('customers', CustomerController::class);
     });
 
     // Cashier + Admin routes

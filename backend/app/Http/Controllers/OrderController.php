@@ -25,7 +25,7 @@ class OrderController extends Controller
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all menus',
+            'action' => 'Viewed all Orders',
             'timestamp' => now(),
         ]);
 
@@ -37,10 +37,34 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        $order = Order::create($request->validated());
+        // Get validated data
+        $data = $request->validated();
 
-        // Audit log is already handled in Order model booted() (created event)
-        return response()->json($order, 201);
+        // Ensure order_timestamp is set if missing
+        if (empty($data['order_timestamp'])) {
+            $data['order_timestamp'] = now();
+        }
+
+        // Ensure expiry_timestamp is null if not provided
+        if (empty($data['expiry_timestamp'])) {
+            $data['expiry_timestamp'] = null;
+        }
+
+        // Normalize order_source to match enum
+        if (!empty($data['order_source'])) {
+            $data['order_source'] = strtoupper($data['order_source']); // "QR" or "COUNTER"
+        }
+
+        // Create order (audit log handled in Order model booted())
+        $order = Order::create($data);
+
+        // Load relationships if needed
+        $order->load(['customer', 'user', 'items', 'payments']);
+
+        return response()->json([
+            'message' => 'Order created successfully.',
+            'order' => $order
+        ], 201);
     }
 
     /**
@@ -58,7 +82,7 @@ class OrderController extends Controller
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all menus',
+            'action' => 'Viewed all Orders',
             'timestamp' => now(),
         ]);
 
