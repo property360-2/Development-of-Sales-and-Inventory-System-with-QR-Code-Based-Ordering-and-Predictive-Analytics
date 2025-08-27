@@ -10,15 +10,26 @@ class UpdateOrderRequest extends FormRequest
     {
         return true;
     }
-    
+
     protected function prepareForValidation()
     {
-        $this->merge([
-            'order_type' => $this->order_type ? trim(strip_tags($this->order_type)) : null,
-            'status' => $this->status ? trim(strip_tags($this->status)) : null,
-            'order_source' => $this->order_source ? trim(strip_tags($this->order_source)) : null,
-        ]);
+        $data = [];
+
+        if ($this->has('order_type')) {
+            $data['order_type'] = trim(strip_tags($this->order_type));
+        }
+
+        if ($this->has('status')) {
+            $data['status'] = trim(strip_tags($this->status));
+        }
+
+        if ($this->has('order_source')) {
+            $data['order_source'] = trim(strip_tags($this->order_source));
+        }
+
+        $this->merge($data);
     }
+
     public function rules(): array
     {
         return [

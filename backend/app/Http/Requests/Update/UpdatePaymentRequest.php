@@ -10,14 +10,22 @@ class UpdatePaymentRequest extends FormRequest
     {
         return true;
     }
-    
+
     protected function prepareForValidation()
     {
-        $this->merge([
-            'payment_method' => $this->payment_method ? trim(strip_tags($this->payment_method)) : null,
-            'payment_status' => $this->payment_status ? trim(strip_tags($this->payment_status)) : null,
-        ]);
+        $data = [];
+
+        if ($this->has('payment_method')) {
+            $data['payment_method'] = trim(strip_tags($this->payment_method));
+        }
+
+        if ($this->has('payment_status')) {
+            $data['payment_status'] = trim(strip_tags($this->payment_status));
+        }
+
+        $this->merge($data);
     }
+
     public function rules(): array
     {
         return [
