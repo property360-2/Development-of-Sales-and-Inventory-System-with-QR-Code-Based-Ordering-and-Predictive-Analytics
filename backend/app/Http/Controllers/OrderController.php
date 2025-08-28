@@ -14,18 +14,28 @@ class OrderController extends Controller
     /**
      * Display a listing of all orders with related data.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['customer', 'user', 'items', 'payments'])->get();
+        $perPage = $request->input('per_page', 20);
+
+        $orders = Order::with([
+            'customer:customer_id,customer_name,table_number,order_reference',
+            'user:user_id,name,role',
+            'items.menu:menu_id,name,price',
+            'payments:payment_id,order_id,amount_paid,payment_method,payment_status'
+        ])
+            ->select('order_id', 'customer_id', 'handled_by', 'status', 'total_amount', 'order_timestamp', 'order_source')
+            ->paginate($perPage);
 
         $userId = Auth::id();
         if (!$userId) {
-            abort(403, 'Unauthorized'); // don’t log anything if no user
+            abort(403, 'Unauthorized');
         }
 
+        // Create Audit Log safely
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all Orders',
+            'action' => 'Viewed all Orders (per_page=' . $perPage . ')',
             'timestamp' => now(),
         ]);
 
@@ -37,28 +47,20 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        // Get validated data
         $data = $request->validated();
 
-        // Ensure order_timestamp is set if missing
-        if (empty($data['order_timestamp'])) {
-            $data['order_timestamp'] = now();
-        }
+        // Ensure timestamps
+        $data['order_timestamp'] = $data['order_timestamp'] ?? now();
+        $data['expiry_timestamp'] = $data['expiry_timestamp'] ?? null;
 
-        // Ensure expiry_timestamp is null if not provided
-        if (empty($data['expiry_timestamp'])) {
-            $data['expiry_timestamp'] = null;
-        }
-
-        // Normalize order_source to match enum
+        // Normalize enum
         if (!empty($data['order_source'])) {
-            $data['order_source'] = strtoupper($data['order_source']); // "QR" or "COUNTER"
+            $data['order_source'] = strtoupper($data['order_source']);
         }
 
-        // Create order (audit log handled in Order model booted())
         $order = Order::create($data);
 
-        // Load relationships if needed
+        // Load relationships
         $order->load(['customer', 'user', 'items', 'payments']);
 
         return response()->json([
@@ -72,17 +74,23 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = Order::with(['customer', 'user', 'items', 'payments'])->findOrFail($id);
+        $order = Order::with([
+            'customer:customer_id,customer_name,table_number,order_reference',
+            'user:user_id,name,role',
+            'items.menu:menu_id,name,price',
+            'payments:payment_id,order_id,amount_paid,payment_method,payment_status'
+        ])
+            ->select('order_id', 'customer_id', 'handled_by', 'status', 'total_amount', 'order_timestamp', 'order_source')
+            ->findOrFail($id);
 
-        // Log "view" action
         $userId = Auth::id();
         if (!$userId) {
-            abort(403, 'Unauthorized'); // don’t log anything if no user
+            abort(403, 'Unauthorized');
         }
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all Orders',
+            'action' => 'Viewed Order ID: ' . $order->order_id,
             'timestamp' => now(),
         ]);
 
@@ -97,7 +105,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->update($request->validated());
 
-        // Audit log is already handled in Order model booted() (updated event)
+        // Audit logging handled in model
         return response()->json($order);
     }
 
@@ -107,7 +115,7 @@ class OrderController extends Controller
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
-        $order->delete(); // triggers booted() deleted event for audit
+        $order->delete(); // triggers model booted() deleted event
 
         return response()->json(null, 204);
     }

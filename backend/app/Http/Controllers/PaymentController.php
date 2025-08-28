@@ -14,43 +14,52 @@ class PaymentController extends Controller
     /**
      * Display a listing of all payments with related order.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::with('order')->get();
+        $perPage = $request->input('per_page', 20);
+
+        $payments = Payment::with([
+            'order:id,order_id,customer_id,total_amount,status,order_timestamp'
+        ])
+            ->select('payment_id', 'order_id', 'amount_paid', 'payment_method', 'payment_status', 'payment_timestamp')
+            ->paginate($perPage);
 
         $userId = Auth::id();
         if (!$userId) {
-            abort(403, 'Unauthorized'); // don’t log anything if no user
+            abort(403, 'Unauthorized');
         }
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all menus',
+            'action' => 'Viewed all Payments',
             'timestamp' => now(),
         ]);
-
 
         return response()->json($payments);
     }
 
     public function show($id)
     {
-        $payment = Payment::with('order')->findOrFail($id);
+        $payment = Payment::with([
+            'order:id,order_id,customer_id,total_amount,status,order_timestamp'
+        ])
+            ->select('payment_id', 'order_id', 'amount_paid', 'payment_method', 'payment_status', 'payment_timestamp')
+            ->findOrFail($id);
 
-        // Audit log for viewing a specific payment
         $userId = Auth::id();
         if (!$userId) {
-            abort(403, 'Unauthorized'); // don’t log anything if no user
+            abort(403, 'Unauthorized');
         }
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all menus',
+            'action' => 'Viewed Payment ID: ' . $id,
             'timestamp' => now(),
         ]);
 
         return response()->json($payment);
     }
+
 
 
     public function store(StorePaymentRequest $request)

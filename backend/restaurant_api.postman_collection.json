@@ -1,13 +1,13 @@
 {
     "info": {
-        "name": "Restaurant API Full CRUD",
-        "_postman_id": "restaurant-api-full-002",
-        "description": "Complete CRUD Postman collection for Sales & Inventory System with QR Code Ordering and RBAC",
+        "name": "last test for backend",
+        "_postman_id": "restaurant-api-full-crud",
+        "description": "Complete interrelated CRUD flow for Users, Customers, Menus, Orders, Order Items, Payments, Audit Logs",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
-            "name": "Login",
+            "name": "Auth",
             "item": [
                 {
                     "name": "Admin Login",
@@ -49,32 +49,6 @@
             "name": "Admin Flow",
             "item": [
                 {
-                    "name": "Get Users",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/users"
-                    }
-                },
-                {
-                    "name": "Show User",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/users/1"
-                    }
-                },
-                {
                     "name": "Create User",
                     "request": {
                         "method": "POST",
@@ -96,41 +70,7 @@
                     }
                 },
                 {
-                    "name": "Update User",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{ \"name\": \"Updated Admin\", \"contact_number\": \"09170000000\" }"
-                        },
-                        "url": "{{base_url}}/users/1"
-                    }
-                },
-                {
-                    "name": "Delete User",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/users/1"
-                    }
-                },
-                {
-                    "name": "Get Menus",
+                    "name": "Get Users",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -139,20 +79,7 @@
                                 "value": "Bearer {{admin_token}}"
                             }
                         ],
-                        "url": "{{base_url}}/menus"
-                    }
-                },
-                {
-                    "name": "Show Menu",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/menus/1"
+                        "url": "{{base_url}}/users"
                     }
                 },
                 {
@@ -171,69 +98,9 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{ \"name\": \"Cheeseburger\", \"description\": \"Juicy beef patty with melted cheese\", \"price\": 150.00, \"category\": \"Food\", \"availability_status\": true, \"product_details\": \"Served with fries and soft drink\" }"
+                            "raw": "{ \"name\": \"Cheeseburger\", \"description\": \"Juicy beef patty with cheese\", \"price\": 150.00, \"category\": \"Food\", \"availability_status\": true, \"product_details\": \"Served with fries\" }"
                         },
                         "url": "{{base_url}}/menus"
-                    }
-                },
-                {
-                    "name": "Update Menu",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{ \"price\": 200.00, \"availability_status\": false }"
-                        },
-                        "url": "{{base_url}}/menus/1"
-                    }
-                },
-                {
-                    "name": "Delete Menu",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/menus/1"
-                    }
-                },
-                {
-                    "name": "Get Customers",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/customers"
-                    }
-                },
-                {
-                    "name": "Show Customer",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/customers/1"
                     }
                 },
                 {
@@ -256,85 +123,12 @@
                         },
                         "url": "{{base_url}}/customers"
                     }
-                },
-                {
-                    "name": "Update Customer",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{ \"customer_name\": \"Updated Customer\" }"
-                        },
-                        "url": "{{base_url}}/customers/1"
-                    }
-                },
-                {
-                    "name": "Delete Customer",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/customers/1"
-                    }
-                },
-                {
-                    "name": "Get Orders",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/orders"
-                    }
-                },
-                {
-                    "name": "Get Audit Logs",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{admin_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/audit-logs"
-                    }
                 }
             ]
         },
         {
             "name": "Cashier Flow",
             "item": [
-                {
-                    "name": "Get Menus",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{cashier_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/menus"
-                    }
-                },
                 {
                     "name": "Create Order",
                     "request": {
@@ -351,28 +145,15 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{ \"customer_id\": 1, \"handled_by\": 2, \"order_type\": \"dine-in\", \"status\": \"pending\", \"total_amount\": 150.00, \"order_timestamp\": \"2025-08-26T12:00:00\", \"expiry_timestamp\": \"2025-08-26T13:00:00\", \"order_source\": \"QR\" }"
+                            "raw": "{ \"customer_id\": 1, \"handled_by\": 2, \"order_type\": \"dine-in\", \"status\": \"pending\", \"total_amount\": 150.00, \"order_timestamp\": \"2025-08-28T12:00:00\", \"expiry_timestamp\": \"2025-08-28T13:00:00\", \"order_source\": \"QR\" }"
                         },
                         "url": "{{base_url}}/orders"
                     }
                 },
                 {
-                    "name": "Show Order",
+                    "name": "Create Order Item",
                     "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{cashier_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/orders/1"
-                    }
-                },
-                {
-                    "name": "Update Order",
-                    "request": {
-                        "method": "PUT",
+                        "method": "POST",
                         "header": [
                             {
                                 "key": "Authorization",
@@ -385,22 +166,9 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{ \"status\": \"preparing\" }"
+                            "raw": "{ \"order_id\": 1, \"menu_id\": 1, \"quantity\": 2, \"price\": 150.00 }"
                         },
-                        "url": "{{base_url}}/orders/1"
-                    }
-                },
-                {
-                    "name": "Delete Order",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{cashier_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/orders/1"
+                        "url": "{{base_url}}/order-items"
                     }
                 },
                 {
@@ -419,56 +187,27 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{ \"order_id\": 1, \"amount_paid\": 150.00, \"payment_method\": \"cash\", \"payment_status\": \"completed\", \"payment_timestamp\": \"2025-08-26T12:05:00\" }"
+                            "raw": "{ \"order_id\": 1, \"amount_paid\": 300.00, \"payment_method\": \"cash\", \"payment_status\": \"completed\", \"payment_timestamp\": \"2025-08-28T12:05:00\" }"
                         },
                         "url": "{{base_url}}/payments"
                     }
-                },
+                }
+            ]
+        },
+        {
+            "name": "Audit Logs",
+            "item": [
                 {
-                    "name": "Show Payment",
+                    "name": "Get All Audit Logs",
                     "request": {
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Authorization",
-                                "value": "Bearer {{cashier_token}}"
+                                "value": "Bearer {{admin_token}}"
                             }
                         ],
-                        "url": "{{base_url}}/payments/1"
-                    }
-                },
-                {
-                    "name": "Update Payment",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{cashier_token}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{ \"payment_status\": \"refunded\" }"
-                        },
-                        "url": "{{base_url}}/payments/1"
-                    }
-                },
-                {
-                    "name": "Delete Payment",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{cashier_token}}"
-                            }
-                        ],
-                        "url": "{{base_url}}/payments/1"
+                        "url": "{{base_url}}/audit-logs"
                     }
                 }
             ]

@@ -13,17 +13,22 @@ return new class extends Migration {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('payment_id');
             $table->unsignedBigInteger('order_id');
-            $table->decimal('amount_paid', 10, 2);
-            $table->enum('payment_method', ['cash', 'gcash', 'card']);
-            $table->enum('payment_status', ['pending', 'completed', 'failed'])->default('pending');
-            $table->timestamp('payment_timestamp')->useCurrent();
+            $table->decimal('amount_paid', 10, 2)->index(); // ✅ useful for reports & filtering
+            $table->enum('payment_method', ['cash', 'gcash', 'card'])->index(); // ✅ mabilis sa filtering
+            $table->enum('payment_status', ['pending', 'completed', 'failed'])->default('pending')->index(); // ✅ filtering for pending/failed payments
+            $table->timestamp('payment_timestamp')->useCurrent()->index(); // ✅ for timeline-based reports
             $table->timestamps();
 
-            // Foreign Keys
-            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('cascade');
+            // Foreign Key
+            $table->foreign('order_id')
+                ->references('order_id')
+                ->on('orders')
+                ->onDelete('cascade');
+
+            // 🔑 Composite Index (fast queries: payments per order)
+            $table->index(['order_id', 'payment_status']);
         });
     }
-
 
     /**
      * Reverse the migrations.

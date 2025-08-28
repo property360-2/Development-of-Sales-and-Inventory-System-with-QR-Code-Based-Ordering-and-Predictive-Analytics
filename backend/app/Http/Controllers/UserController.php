@@ -16,9 +16,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::select('user_id', 'name','role', 'created_at')
+            ->paginate(20);
 
-        // Audit log for viewing all users
         $userId = Auth::id();
         if ($userId) {
             AuditLog::create([
@@ -29,6 +29,23 @@ class UserController extends Controller
         }
 
         return response()->json($users);
+    }
+
+    public function show($id)
+    {
+        $user = User::select('user_id', 'name','role', 'created_at')
+            ->findOrFail($id);
+
+        $userId = Auth::id();
+        if ($userId) {
+            AuditLog::create([
+                'user_id' => $userId,
+                'action' => 'Viewed User ID: ' . $user->user_id,
+                'timestamp' => now(),
+            ]);
+        }
+
+        return response()->json($user);
     }
 
     /**
@@ -47,27 +64,8 @@ class UserController extends Controller
     /**
      * Display a specific user.
      */
-    public function show($id)
-    {
-        $user = User::findOrFail($id);
 
-        // Audit log for viewing a specific user
-        $userId = Auth::id();
-        if ($userId) {
-            AuditLog::create([
-                'user_id' => $userId,
-                'action' => 'Viewed User ID: ' . $user->user_id,
-                'timestamp' => now(),
-            ]);
-        }
 
-        return response()->json($user);
-    }
-
-    /**
-     * Update an existing user.
-     * No audit log here; model handles 'updated'.
-     */
     public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);

@@ -14,24 +14,29 @@ class CustomerController extends Controller
     /**
      * Display all customers
      */
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::all();
+        // default 20, pero pwede i-set sa query param
+        $perPage = $request->input('per_page', 20);
+
+        $customers = Customer::select('customer_id', 'customer_name', 'table_number', 'order_reference')
+            ->paginate($perPage);
 
         // Log "view all" action
         $userId = Auth::id();
         if (!$userId) {
-            abort(403, 'Unauthorized'); // don’t log anything if no user
+            abort(403, 'Unauthorized');
         }
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all menus',
+            'action' => 'Viewed all Customers (per_page=' . $perPage . ')',
             'timestamp' => now(),
         ]);
 
         return response()->json($customers);
     }
+
 
     /**
      * Store a new customer
@@ -56,7 +61,7 @@ class CustomerController extends Controller
 
         AuditLog::create([
             'user_id' => $userId,
-            'action' => 'Viewed all menus',
+            'action' => 'Viewed Customer: ' . $customer->customer_id,
             'timestamp' => now(),
         ]);
 

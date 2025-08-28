@@ -13,14 +13,20 @@ return new class extends Migration {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id('log_id');
             $table->unsignedBigInteger('user_id');
-            $table->string('action', 255);
-            $table->timestamp('timestamp')->useCurrent();
+            $table->string('action', 255)->index(); // ✅ mabilis i-search by action
+            $table->timestamp('timestamp')->useCurrent()->index(); // ✅ para sa timeline queries
+            $table->timestamps(); // ✅ consistency across tables
 
-            // Foreign Keys
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            // Foreign Key
+            $table->foreign('user_id')
+                ->references('user_id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            // 🔑 Composite Index (useful kung gusto mo tingnan logs ng specific user within date range)
+            $table->index(['user_id', 'timestamp']);
         });
     }
-
 
     /**
      * Reverse the migrations.

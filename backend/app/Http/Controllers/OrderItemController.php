@@ -12,11 +12,20 @@ class OrderItemController extends Controller
     /**
      * Display a listing of all order items with related order and menu.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orderItems = OrderItem::with(['order', 'menu'])->get();
+        $perPage = $request->input('per_page', 20); // default 20
+
+        $orderItems = OrderItem::with([
+            'order:id,order_id,customer_id,status,total_amount,order_timestamp',
+            'menu:id,menu_id,name,price'
+        ])
+            ->select('order_item_id', 'order_id', 'menu_id', 'quantity', 'price')
+            ->paginate($perPage);
+
         return response()->json($orderItems);
     }
+
 
 
     /**
@@ -24,9 +33,16 @@ class OrderItemController extends Controller
      */
     public function show($id)
     {
-        $orderItem = OrderItem::with(['order', 'menu'])->findOrFail($id);
+        $orderItem = OrderItem::with([
+            'order:id,order_id,customer_id,status,total_amount,order_timestamp',
+            'menu:id,menu_id,name,price'
+        ])
+            ->select('order_item_id', 'order_id', 'menu_id', 'quantity', 'price')
+            ->findOrFail($id);
+
         return response()->json($orderItem);
     }
+
     public function store(StoreOrderItemRequest $request)
     {
         $item = OrderItem::create($request->validated());

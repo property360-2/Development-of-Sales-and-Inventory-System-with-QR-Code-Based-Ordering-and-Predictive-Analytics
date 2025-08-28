@@ -15,9 +15,12 @@ return new class extends Migration {
             $table->string('name', 100);
             $table->string('username', 50)->unique();
             $table->string('password');
-            $table->enum('role', ['Admin', 'Cashier']);
+            $table->enum('role', ['Admin', 'Cashier'])->index(); // index for role filters
             $table->string('contact_number', 20)->nullable();
             $table->timestamps();
+
+            // 🔑 Additional indexes
+            $table->index('name'); // useful for searching by name
         });
     }
 

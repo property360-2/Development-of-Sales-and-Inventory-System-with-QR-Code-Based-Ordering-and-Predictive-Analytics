@@ -15,13 +15,16 @@ return new class extends Migration {
             $table->string('name', 100);
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
-            $table->string('category', 50);
-            $table->boolean('availability_status')->default(true);
+            $table->string('category', 50)->index(); // ✅ filtering/search by category
+            $table->boolean('availability_status')->default(true)->index(); // ✅ fast lookup for available items
             $table->text('product_details')->nullable();
             $table->timestamps();
+
+            // 🔑 Additional indexes
+            $table->index('name'); // ✅ searching products by name
+            $table->index('price'); // ✅ useful for sorting/filtering menus by price
         });
     }
-
 
     /**
      * Reverse the migrations.
