@@ -100,23 +100,34 @@
 - ✅ Installed **framer-motion** for animated dropdowns → `npm install framer-motion`
 - ✅ TailwindCSS already configured for responsive UI.
 - 📌 Next step: Add **global logo & custom fonts** inside `public/` or `src/assets/` folder, then configure them in `tailwind.config.js`.
- 
+
 ### 4: Core Pages
 
 - **Admin Panel**
-  - [ ] Manage Menus (CRUD for products/menu items)
-  - [ ] Manage Users (CRUD for system users, roles)
-  - [ ] View Audit Logs (track login & important actions)
+
+  - [ ] Manage Menus (CRUD for products/menu items) , puro get pa lang
+  - [ ] Manage Users (CRUD for system users, roles), puro get lang
+  - [√] View Audit Logs (track login & important actions)
 
 - **Cashier Dashboard**
-  - [ ] Manage Orders (create/update orders, mark completed)
+
+  - [√] Manage Orders (create/update orders, mark completed), get pa lang bro
   - [ ] Process Payments (cash / digital)
   - [ ] Generate Receipts (print/export functionality)
 
-- **Customer QR Page** → *To be done later*
+- **Customer QR Page** → _To be done later_
   - Scan QR
   - Auto insert table number
   - Menu / Cart / Checkout
+
+**Notes (for reference):**
+These were added recently to support the layouts, menus, and animations:
+
+- **lucide-react**  
+  Provides icons used across Admin & Cashier layouts (e.g., `Menu`, `Users`, `ClipboardList`, `FileText`, `UsersRound`).
+
+- **framer-motion**  
+  Handles animations for mobile dropdown menus and transitions.
 
 ### – 5: State Management & API Integration
 
