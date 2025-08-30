@@ -88,15 +88,35 @@
 
 ### 3: Layout & Navigation
 
-- [ ] Sidebar + navbar (role-based menus)x`
-- [ ] Dynamic navigation (hide/show per role)
-- [ ] Setup global assets (logos, fonts, icons)
+- [√] Sidebar + navbar (role-based menus)
+- [√] Dynamic navigation (hide/show per role)
+- [√] Setup global assets (logos, fonts, icons)
 
+**Notes (for reference):**
+
+- ✅ Used **ProtectedRoute** for role-based access control (Admin / Cashier).
+- ✅ Created **AdminLayout** and **CashierLayout** with responsive top navigation bar (animated mobile menu using framer-motion).
+- ✅ Installed **lucide-react** for icons → `npm install lucide-react`
+- ✅ Installed **framer-motion** for animated dropdowns → `npm install framer-motion`
+- ✅ TailwindCSS already configured for responsive UI.
+- 📌 Next step: Add **global logo & custom fonts** inside `public/` or `src/assets/` folder, then configure them in `tailwind.config.js`.
+ 
 ### 4: Core Pages
 
-- **Admin Panel** → Manage menus, manage users, view audit logs
-- **Cashier Dashboard** → Manage orders, process payments, generate receipts
-- **Customer QR Page** → Scan QR, auto insert table number, menu/cart/checkout
+- **Admin Panel**
+  - [ ] Manage Menus (CRUD for products/menu items)
+  - [ ] Manage Users (CRUD for system users, roles)
+  - [ ] View Audit Logs (track login & important actions)
+
+- **Cashier Dashboard**
+  - [ ] Manage Orders (create/update orders, mark completed)
+  - [ ] Process Payments (cash / digital)
+  - [ ] Generate Receipts (print/export functionality)
+
+- **Customer QR Page** → *To be done later*
+  - Scan QR
+  - Auto insert table number
+  - Menu / Cart / Checkout
 
 ### – 5: State Management & API Integration
 

@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuthStore from "../stores/useAuthStore";
+import useAuthStore from "../../stores/useAuthStore";
 
-export default function AdminDashboard() {
+export default function CashierDashboard() {
   const { user, token, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  // Redirect if not logged in or not admin
+  // Redirect if not logged in or not cashier
   useEffect(() => {
-    if (!user || user.role !== "Admin") {
+    if (!user || user.role !== "Cashier") {
       navigate("/login");
     }
   }, [user, navigate]);
@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold">Cashier Dashboard</h1>
         <button
           onClick={handleLogout}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="mt-6">
-        <p>Manage Menus, Users, Audit Logs here...</p>
+        <p>Manage Orders & Payments here...</p>
       </div>
     </div>
   );
