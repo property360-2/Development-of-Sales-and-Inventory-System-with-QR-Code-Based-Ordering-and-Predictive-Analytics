@@ -16,7 +16,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::select('user_id', 'name','role', 'created_at')
+        $users = User::select('user_id','username', 'name','role', 'created_at','contact_number')
             ->paginate(20);
 
         $userId = Auth::id();
@@ -33,7 +33,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::select('user_id', 'name','role', 'created_at')
+        $user = User::select('user_id', 'name','username','role', 'created_at','contact_number')
             ->findOrFail($id);
 
         $userId = Auth::id();

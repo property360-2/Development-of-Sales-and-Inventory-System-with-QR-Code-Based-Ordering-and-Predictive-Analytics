@@ -105,10 +105,15 @@
 
 - **Admin Panel**
 
-  - [ ] Manage Menus (CRUD for products/menu items) , puro get pa lang
+  - [ ] Manage Menus {
+    C - 
+    R - done, uses tanStack for caching
+    U - 
+    D - 
+  }
   - [ ] Manage Users (CRUD for system users, roles), puro get lang
   - [√] View Audit Logs (track login & important actions)
-
+  - 
 - **Cashier Dashboard**
 
   - [√] Manage Orders (create/update orders, mark completed), get pa lang bro

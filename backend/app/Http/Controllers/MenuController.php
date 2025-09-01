@@ -16,7 +16,7 @@ class MenuController extends Controller
     {
         $perPage = $request->input('per_page', 20); // default 20 per page
 
-        $menus = Menu::select('menu_id', 'name', 'price', 'category', 'availability_status')
+        $menus = Menu::select('menu_id', 'name', 'description', 'price', 'category', 'availability_status', 'product_details')
             ->paginate($perPage);
 
         $userId = Auth::id();
