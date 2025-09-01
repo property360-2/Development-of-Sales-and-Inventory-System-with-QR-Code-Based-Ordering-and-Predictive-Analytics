@@ -105,15 +105,22 @@
 
 - **Admin Panel**
 
-  - [ ] Manage Menus {
-    C - 
-    R - done, uses tanStack for caching
-    U - 
-    D - 
-  }
-  - [ ] Manage Users (CRUD for system users, roles), puro get lang
+  - [√] Manage Menus (CRUD for products/menu items) , puro get pa lang
+  - [√] Manage Users (CRUD for system users, roles), puro get lang
   - [√] View Audit Logs (track login & important actions)
-  - 
+
+  - complete admin panel with menus, users, audit logs, and dashboard: 
+
+- Setup Vite + React + TailwindCSS + shadcn-ui
+- Added React Query for caching & optimistic updates
+- Implemented Admin Dashboard with rotating quotes & welcome message
+- Created responsive top navbar with sidebar-style navigation
+- Menu Management: list, pagination, view details modal, add/edit with placeholders
+- User Management: list, pagination, view details modal, add/edit
+- Audit Logs: paginated list, categorized actions, modal view
+- Optimistic updates for add/edit actions via React Query
+- Axios instance and localStorage auth persistence
+- Consistent TailwindCSS styling & Framer Motion animations
 - **Cashier Dashboard**
 
   - [√] Manage Orders (create/update orders, mark completed), get pa lang bro
