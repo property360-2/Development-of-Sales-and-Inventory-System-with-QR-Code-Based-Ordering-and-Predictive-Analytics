@@ -84,14 +84,24 @@ function MenuModal({ isOpen, onClose, initialData, onSubmit }) {
             }
             required
           />
-          <Input
-            placeholder="Category"
+          {/* Category (Select instead of Input) */}
+          <Select
             value={formData.category}
-            onChange={(e) =>
-              setFormData({ ...formData, category: e.target.value })
+            onValueChange={(value) =>
+              setFormData({ ...formData, category: value })
             }
-            required
-          />
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="food">Food</SelectItem>
+              <SelectItem value="beverages">Beverages</SelectItem>
+              <SelectItem value="dessert">Dessert</SelectItem>
+              <SelectItem value="snack">Snack</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Input
             placeholder="Product Details"
             value={formData.product_details}
@@ -119,7 +129,7 @@ function MenuModal({ isOpen, onClose, initialData, onSubmit }) {
             <Button type="button" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" variant="submit">
               {initialData ? "Save Changes" : "Add Menu"}
             </Button>
           </div>
@@ -208,10 +218,10 @@ export default function AdminMenus() {
   // -----------------------
   const addMenuMutation = useMutation({
     mutationFn: (newMenu) => axiosInstance.post("/menus", newMenu),
-    onSuccess: () => {
+    onSuccess: (_, newMenu) => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       setAddOpen(false);
-      toast.success("Menu added successfully!");
+      toast.success(`"${newMenu.name}" has been added!`);
     },
     onError: () => toast.error("Failed to add menu."),
   });
