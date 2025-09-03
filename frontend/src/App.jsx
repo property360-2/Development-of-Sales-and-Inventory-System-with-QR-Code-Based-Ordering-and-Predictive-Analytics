@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import AppRouter from "./routes/AppRouter";
 import useAuthStore from "./stores/useAuthStore";
+import { Toaster } from "react-hot-toast"; // ✅ import Toaster
 
 // React Query imports
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -25,6 +26,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppRouter />
+      <Toaster position="top-right" reverseOrder={false} />
 
       {/* ✅ Only load devtools in development */}
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
