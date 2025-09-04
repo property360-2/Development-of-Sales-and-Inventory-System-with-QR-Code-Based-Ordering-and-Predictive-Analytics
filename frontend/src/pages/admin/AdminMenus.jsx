@@ -1,3 +1,4 @@
+// to do:  add an eye icon where a user can see more about the menu whenever he hover or clicked it
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../api/axiosInstance";
@@ -214,34 +215,34 @@ export default function AdminMenus() {
   );
 
   // -----------------------
-  // Mutations (unchanged)
+  // Mutations (with fixed toast)
   // -----------------------
   const addMenuMutation = useMutation({
     mutationFn: (newMenu) => axiosInstance.post("/menus", newMenu),
-    onSuccess: (_, newMenu) => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       setAddOpen(false);
-      toast.success(`"${newMenu.name}" has been added!`);
+      toast.success(`"${res.data.name}" has been added!`);
     },
     onError: () => toast.error("Failed to add menu."),
   });
 
   const editMenuMutation = useMutation({
     mutationFn: ({ id, data }) => axiosInstance.put(`/menus/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       setEditData(null);
-      toast.success("Menu updated!");
+      toast.success(`"${res.data.name}" has been updated!`);
     },
     onError: () => toast.error("Failed to update menu."),
   });
 
   const deleteMenuMutation = useMutation({
     mutationFn: (id) => axiosInstance.delete(`/menus/${id}`),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["menus"] });
       setDeleteData(null);
-      toast.success("Menu deleted!");
+      toast.success(`Menu "${deleteData?.name}" has been deleted!`);
     },
     onError: () => toast.error("Failed to delete menu."),
   });
