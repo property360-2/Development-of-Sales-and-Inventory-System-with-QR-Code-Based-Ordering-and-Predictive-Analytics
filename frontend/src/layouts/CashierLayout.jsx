@@ -1,18 +1,35 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, LogOut, ShoppingCart, History, FileText } from "lucide-react";
+import {
+  Menu,
+  LogOut,
+  ShoppingCart,
+  FileText,
+  CreditCard,
+  Printer,
+} from "lucide-react";
 import { useNavigate, Outlet } from "react-router-dom";
 import useAuthStore from "../stores/useAuthStore";
 
 export default function CashierLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
+
+  const NavButton = ({ to, icon: Icon, label, extraClass = "" }) => (
+    <button
+      onClick={() => navigate(to)}
+      className={`hover:underline flex items-center gap-1 ${extraClass}`}
+    >
+      <Icon size={16} />
+      {label}
+    </button>
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -27,23 +44,20 @@ export default function CashierLayout() {
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-6 items-center">
-          <button
-            onClick={() => navigate("/cashier")}
-            className="hover:underline"
-          >
-            <FileText size={16} className="inline mr-1" /> Dashboard
-          </button>
-          <button
-            onClick={() => navigate("/cashier/orders")}
-            className="hover:underline"
-          >
-            <ShoppingCart size={16} className="inline mr-1" /> Orders
-          </button>
+          <NavButton to="/cashier" icon={FileText} label="Dashboard" />
+          <NavButton to="/cashier/orders" icon={ShoppingCart} label="Orders" />
+          <NavButton
+            to="/cashier/payments"
+            icon={CreditCard}
+            label="Payments"
+          />
+          <NavButton to="/cashier/receipts" icon={Printer} label="Receipts" />
           <button
             onClick={handleLogout}
-            className="text-red-300 hover:underline"
+            className="text-red-300 hover:underline flex items-center gap-1"
           >
-            <LogOut size={16} className="inline mr-1" /> Logout
+            <LogOut size={16} />
+            Logout
           </button>
         </nav>
 
@@ -66,18 +80,25 @@ export default function CashierLayout() {
             transition={{ duration: 0.25 }}
             className="md:hidden bg-blue-600 text-white flex flex-col space-y-2 p-4 shadow-lg"
           >
-            <button onClick={() => navigate("/cashier")} className="text-left">
-              <FileText size={16} className="inline mr-1" /> Dashboard
-            </button>
+            <NavButton to="/cashier" icon={FileText} label="Dashboard" />
+            <NavButton
+              to="/cashier/orders"
+              icon={ShoppingCart}
+              label="Orders"
+            />
+            <NavButton
+              to="/cashier/payments"
+              icon={CreditCard}
+              label="Payments"
+            />
+            <NavButton to="/cashier/receipts" icon={Printer} label="Receipts" />
+
             <button
-              onClick={() => navigate("/cashier/orders")}
-              className="text-left"
+              onClick={handleLogout}
+              className="text-left text-red-300 flex items-center gap-1"
             >
-              <ShoppingCart size={16} className="inline mr-1" /> Orders
-            </button>
-            
-            <button onClick={handleLogout} className="text-left text-red-300">
-              <LogOut size={16} className="inline mr-1" /> Logout
+              <LogOut size={16} />
+              Logout
             </button>
           </motion.div>
         )}

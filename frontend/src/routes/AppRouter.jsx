@@ -11,6 +11,9 @@ import AdminAuditLogs from "../pages/admin/AdminAuditLogs";
 // Cashier Pages
 import CashierDashboard from "../pages/cashier/CashierDashboard";
 import CashierOrders from "../pages/cashier/CashierOrders";
+import CashierPOS from "../pages/cashier/CashierPos";
+import CashierPayment from "../pages/cashier/CashierPayment";
+import CashierReceipt from "../pages/cashier/CashierReceipt";
 
 import ProtectedRoute from "./ProtectedRoute";
 import AdminLayout from "../layouts/AdminLayout";
@@ -50,6 +53,9 @@ export default function AppRouter() {
         >
           <Route index element={<CashierDashboard />} />
           <Route path="orders" element={<CashierOrders />} />
+          <Route path="pos" element={<CashierPOS />} />
+          <Route path="payments" element={<CashierPayment />} />
+          <Route path="receipts" element={<CashierPayment />} />
         </Route>
 
         {/* Fallback */}

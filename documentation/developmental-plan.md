@@ -105,7 +105,7 @@
 
 - **Admin Panel**
   - [√] Manage Menus (CRUD for products/menu items)
-  - [√] Manage Users (CRUD for system users, roles)
+  - [√] Manage Users (CRUD for system users, roles) 
   - [ ] View Audit Logs (track login & important actions)
 
 - **Cashier Dashboard**
