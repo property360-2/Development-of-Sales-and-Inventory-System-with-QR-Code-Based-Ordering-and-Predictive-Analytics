@@ -23,7 +23,8 @@ class MenuController extends Controller
             'price',
             'category',
             'availability_status',
-            'product_details'
+            'product_details',
+            'updated_at'
         )
             ->orderBy('menu_id', 'desc') // ✅ tamang paraan
             ->paginate($perPage);

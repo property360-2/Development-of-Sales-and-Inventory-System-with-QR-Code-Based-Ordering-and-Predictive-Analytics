@@ -24,7 +24,8 @@ import { Button } from "@/components/ui/button";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
-import { Search } from "lucide-react";
+import { Search, Eye } from "lucide-react";
+import * as HoverCard from "@radix-ui/react-hover-card"; // 👈 import HoverCard
 
 // -----------------------
 // Menu Add/Edit Modal
@@ -139,7 +140,57 @@ function MenuModal({ isOpen, onClose, initialData, onSubmit }) {
     </Dialog.Root>
   );
 }
+function ViewMenuModal({ isOpen, onClose, menu }) {
+  if (!menu) return null;
 
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={onClose}>
+      <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+      <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg w-[400px]">
+        <Dialog.Title className="text-lg font-bold mb-4">
+          Menu Details
+        </Dialog.Title>
+
+        <div className="space-y-2 text-gray-700">
+          <p>
+            <span className="font-semibold">Name:</span> {menu.name}
+          </p>
+          <p>
+            <span className="font-semibold">Category:</span> {menu.category}
+          </p>
+          <p>
+            <span className="font-semibold">Price:</span> ₱{menu.price}
+          </p>
+          <p>
+            <span className="font-semibold">Available:</span>{" "}
+            {menu.availability_status ? "Yes" : "No"}
+          </p>
+          <p>
+            <span className="font-semibold">Description:</span>{" "}
+            {menu.description || "—"}
+          </p>
+          <p>
+            <span className="font-semibold">Details:</span>{" "}
+            {menu.product_details || "—"}
+          </p>
+          <p>
+            <span className="font-semibold">Last time updated:</span>{" "}
+            {menu.updated_at
+              ? new Date(menu.updated_at).toLocaleString("en-PH", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })
+              : "—"}
+          </p>
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button onClick={onClose}>Close</Button>
+        </div>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+}
 // -----------------------
 // Confirm Delete Modal
 // -----------------------
@@ -173,8 +224,9 @@ export default function AdminMenus() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [page, setPage] = useState(1); // NEW
-  const [perPage, setPerPage] = useState(10); // NEW
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [viewData, setViewData] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -307,6 +359,37 @@ export default function AdminMenus() {
               <TableCell>{menu.price}</TableCell>
               <TableCell>{menu.availability_status ? "Yes" : "No"}</TableCell>
               <TableCell className="flex gap-2">
+                {/* 👁 Eye button with hover + click */}
+                <HoverCard.Root>
+                  <HoverCard.Trigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setViewData(menu)} // full modal on click
+                    >
+                      <Eye size={16} />
+                    </Button>
+                  </HoverCard.Trigger>
+                  <HoverCard.Content
+                    className="rounded-lg border bg-white p-3 shadow-md w-64"
+                    side="top"
+                    align="center"
+                  >
+                    <p className="text-xs text-gray-600">
+                      {menu.description || "No description"}
+                    </p>
+                    <p className="text-xs">
+                      Last update:{" "}
+                      {menu.updated_at
+                        ? new Date(menu.updated_at).toLocaleString("en-PH", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "—"}
+                    </p>
+                  </HoverCard.Content>
+                </HoverCard.Root>
+
                 <Button size="sm" onClick={() => setEditData(menu)}>
                   Edit
                 </Button>
@@ -366,6 +449,13 @@ export default function AdminMenus() {
             </div>
           </div>
         </div>
+      )}
+      {viewData && (
+        <ViewMenuModal
+          isOpen={!!viewData}
+          onClose={() => setViewData(null)}
+          menu={viewData}
+        />
       )}
 
       {/* Modals (unchanged) */}

@@ -1,5 +1,3 @@
-// to do:  add an eye icon where a user can see more about the menu whenever he hover or clicked it
-
 // src/pages/admin/AdminUsers.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
