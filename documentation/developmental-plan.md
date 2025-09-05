@@ -106,11 +106,11 @@
 - **Admin Panel**
   - [√] Manage Menus (CRUD for products/menu items)
   - [√] Manage Users (CRUD for system users, roles) 
-  - [ ] View Audit Logs (track login & important actions)
+  - [√] View Audit Logs (track login & important actions), this sucks, later to be updated in backend di sya clear bro
 
 - **Cashier Dashboard**
 
-  - [ ] Manage Orders (create/update orders, mark completed)
+  - [in progress] Manage Orders (create/update orders, mark completed)
   - [ ] Process Payments (cash / digital)
   - [ ] Generate Receipts (print/export functionality)
 
