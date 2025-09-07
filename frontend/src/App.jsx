@@ -29,7 +29,7 @@ function App() {
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* ✅ Only load devtools in development */}
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
     </QueryClientProvider>
   );
 }

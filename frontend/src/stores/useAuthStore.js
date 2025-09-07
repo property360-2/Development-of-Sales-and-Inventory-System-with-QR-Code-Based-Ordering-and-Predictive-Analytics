@@ -12,15 +12,17 @@ const useAuthStore = create((set) => ({
     initialize: async () => {
         console.log("🔄 Initializing auth...");
         const token = localStorage.getItem("authToken");
-        const role = localStorage.getItem("userRole");
-        console.log("Found:", { token, role });
+        const userData = localStorage.getItem("userData"); // ✅ full user saved
 
-        if (token && role) {
+        if (token && userData) {
+            const user = JSON.parse(userData);
+            console.log("✅ Restoring session:", user);
+
             // set axios header immediately
             axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             set({
                 token,
-                user: { role },
+                user,
                 loading: false,
             });
         } else {
@@ -35,7 +37,7 @@ const useAuthStore = create((set) => ({
 
             set({ token, user, error: null });
             localStorage.setItem("authToken", token);
-            localStorage.setItem("userRole", user.role);
+            localStorage.setItem("userData", JSON.stringify(user)); // ✅ store full user
 
             axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
@@ -49,7 +51,7 @@ const useAuthStore = create((set) => ({
     logout: async () => {
         set({ user: null, token: null });
         localStorage.removeItem("authToken");
-        localStorage.removeItem("userRole");
+        localStorage.removeItem("userData"); // ✅ clear full user
         delete axiosInstance.defaults.headers.common["Authorization"];
     },
 }));

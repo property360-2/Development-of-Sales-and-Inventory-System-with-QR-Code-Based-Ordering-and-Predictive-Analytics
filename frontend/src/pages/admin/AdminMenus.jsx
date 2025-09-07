@@ -1,4 +1,3 @@
-// to do:  add an eye icon where a user can see more about the menu whenever he hover or clicked it
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../api/axiosInstance";
