@@ -6,21 +6,26 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
-        return true; // add role-based logic later
+        return true; // You can add role-based logic here later
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
-            'order_type' => $this->order_type ? trim(strip_tags($this->order_type)) : null,
-            'status' => $this->status ? trim(strip_tags($this->status)) : null,
-            'order_source' => $this->order_source ? strtoupper(trim(strip_tags($this->order_source))) : null,
+            'order_type' => $this->sanitize($this->order_type),
+            'status' => $this->sanitize($this->status),
+            'order_source' => strtoupper($this->sanitize($this->order_source)),
         ]);
     }
 
-    public function rules()
+    private function sanitize(?string $value): ?string
+    {
+        return $value ? trim(strip_tags($value)) : null;
+    }
+
+    public function rules(): array
     {
         return [
             'customer_id' => 'required|exists:customers,customer_id',
@@ -28,13 +33,13 @@ class StoreOrderRequest extends FormRequest
             'order_type' => 'required|in:dine-in,take-out',
             'status' => 'required|in:pending,preparing,ready,served',
             'total_amount' => 'required|numeric|min:0',
-            'order_timestamp' => 'nullable|date_format:Y-m-d\TH:i:s', // ISO8601
+            'order_timestamp' => 'nullable|date_format:Y-m-d\TH:i:s',
             'expiry_timestamp' => 'nullable|date_format:Y-m-d\TH:i:s',
             'order_source' => 'required|in:QR,COUNTER',
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'customer_id.required' => 'Customer is required for this order.',
