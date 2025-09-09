@@ -71,7 +71,7 @@ export default function CheckoutPage() {
         expiry_timestamp: formatDateTime(
           new Date(now.getTime() + 60 * 60 * 1000)
         ), // +1h
-        order_source: "QR",
+        order_source: "Counter",
       };
       console.log("Creating order with data:", orderData);
 
