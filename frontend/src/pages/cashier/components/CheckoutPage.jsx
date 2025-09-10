@@ -4,6 +4,7 @@ import { usePOSStore } from "@/stores/usePOSStore";
 import useAuthStore from "@/stores/useAuthStore";
 import axiosInstance from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
 
 // shadcn components
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, clearCart } = usePOSStore();
+  const { cart, cartTotal, clearCart, cartCount } = usePOSStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
@@ -27,6 +28,7 @@ export default function CheckoutPage() {
   const [orderType, setOrderType] = useState("dine-in");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [amountTendered, setAmountTendered] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // prevent multiple submits
 
   const total = cartTotal();
   const change = useMemo(() => {
@@ -34,22 +36,23 @@ export default function CheckoutPage() {
     return Math.max(Number(amountTendered) - total, 0);
   }, [amountTendered, total]);
 
-  const formatDateTime = (date) => date.toISOString().slice(0, 19); // YYYY-MM-DDTHH:mm:ss
+  // Badge scale
+  const cartBadgeScale = Math.min(1 + Math.log2(cartCount() || 1) * 0.2, 2);
+
+  const formatDateTime = (date) => date.toISOString().slice(0, 19);
 
   const handleCheckout = async () => {
-    try {
-      console.log("🔄 Starting checkout...");
+    if (isSubmitting || cart.length === 0) return; // prevent multiple submits
+    setIsSubmitting(true);
 
-      // ✅ 1. Create customer
+    try {
+      // 1. Create customer
       const customerData = {
         customer_name: customerName || "Test Customer",
         table_number: tableNumber || "N/A",
         order_reference: `REF-${Date.now()}`,
       };
-      console.log("Creating customer with data:", customerData);
-
       const customerRes = await axiosInstance.post("/customers", customerData);
-      console.log("Customer API response:", customerRes.data);
 
       const customerId =
         Number(customerRes.data?.customer_id) ||
@@ -57,9 +60,8 @@ export default function CheckoutPage() {
         Number(customerRes.data?.customer?.customer_id);
 
       if (!customerId) throw new Error("No customer_id returned from API");
-      console.log("✅ Customer created with ID:", customerId);
 
-      // ✅ 2. Create order
+      // 2. Create order
       const now = new Date();
       const orderData = {
         customer_id: customerId,
@@ -70,13 +72,10 @@ export default function CheckoutPage() {
         order_timestamp: formatDateTime(now),
         expiry_timestamp: formatDateTime(
           new Date(now.getTime() + 60 * 60 * 1000)
-        ), // +1h
+        ),
         order_source: "Counter",
       };
-      console.log("Creating order with data:", orderData);
-
       const orderRes = await axiosInstance.post("/orders", orderData);
-      console.log("Order API response:", orderRes.data);
 
       const orderId =
         Number(orderRes.data?.order_id) ||
@@ -84,9 +83,8 @@ export default function CheckoutPage() {
         Number(orderRes.data?.order?.order_id);
 
       if (!orderId) throw new Error("No order_id returned from API");
-      console.log("✅ Order created with ID:", orderId);
 
-      // ✅ 3. Create payment
+      // 3. Create payment
       const paymentData = {
         order_id: orderId,
         amount_paid: total,
@@ -94,23 +92,16 @@ export default function CheckoutPage() {
         payment_status: "completed",
         payment_timestamp: formatDateTime(now),
       };
-      console.log("Creating payment with data:", paymentData);
+      await axiosInstance.post("/payments", paymentData);
 
-      const paymentRes = await axiosInstance.post("/payments", paymentData);
-      console.log("Payment API response:", paymentRes.data);
-
-      // ✅ 4. Clear cart and navigate
-      if (typeof clearCart === "function") {
-        clearCart();
-      } else {
-        console.warn("⚠️ clearCart is not defined in POS store.");
-      }
-
-      console.log("🎉 Checkout complete!");
-      navigate("/orders"); // Redirect to orders page
+      // 4. Clear cart and navigate
+      clearCart?.();
+      navigate("/pos"); // redirect to POS
     } catch (err) {
       console.error("Checkout error:", err);
-      console.log("Server response:", err.response?.data);
+      alert("Checkout failed. See console for details.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -118,7 +109,20 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-xl">Checkout</CardTitle>
+          <CardTitle className="text-xl flex items-center gap-2">
+            Checkout
+            <div className="relative">
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount() > 0 && (
+                <span
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ transform: `scale(${cartBadgeScale})` }}
+                >
+                  {cartCount()}
+                </span>
+              )}
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Customer Info */}
@@ -188,8 +192,11 @@ export default function CheckoutPage() {
             <span className="text-lg font-semibold flex-1 text-center">
               Total: ₱{total.toFixed(2)}
             </span>
-            <Button onClick={handleCheckout} disabled={cart.length === 0}>
-              Confirm
+            <Button
+              onClick={handleCheckout}
+              disabled={cart.length === 0 || isSubmitting}
+            >
+              {isSubmitting ? "Processing..." : "Confirm"}
             </Button>
           </div>
         </CardContent>

@@ -49,6 +49,8 @@ export const usePOSStore = create((set, get) => ({
     removeFromCart: (menu_id) =>
         set((state) => ({ cart: state.cart.filter((i) => i.menu_id !== menu_id) })),
 
+    clearCart: () => set({ cart: [] }), // ✅ added clearCart
+
     setCartOpen: (open) => set({ cartOpen: open }),
     setPaymentDialogOpen: (open) => set({ paymentDialogOpen: open }),
     setViewOrder: (order) => set({ viewOrder: order }),
@@ -86,12 +88,8 @@ export const usePOSStore = create((set, get) => ({
     // --- Print ---
     printReceipt: (order) => {
         const lines = [];
-        lines.push(
-            `<h2>Receipt — Order #${order.order_id ?? order.id}</h2>`
-        );
-        lines.push(
-            `<p>Cashier: ${useAuthStore.getState().user?.name ?? "-"}</p>`
-        );
+        lines.push(`<h2>Receipt — Order #${order.order_id ?? order.id}</h2>`);
+        lines.push(`<p>Cashier: ${useAuthStore.getState().user?.name ?? "-"}</p>`);
         lines.push(
             `<p>Date: ${new Date(
                 order.order_timestamp ?? order.created_at ?? Date.now()
@@ -106,17 +104,18 @@ export const usePOSStore = create((set, get) => ({
             );
         });
         lines.push("</ul>");
-        lines.push(
-            `<p><strong>Total: ₱${(
-                order.total_amount ?? get().cartTotal()
-            ).toFixed(2)}</strong></p>`
-        );
+
+        // ✅ safe total amount calculation
+        const totalAmount =
+            typeof order.total_amount === "number"
+                ? order.total_amount
+                : Number(order.total_amount) || get().cartTotal();
+        lines.push(`<p><strong>Total: ₱${totalAmount.toFixed(2)}</strong></p>`);
 
         const newWindow = window.open("", "PRINT", "height=600,width=400");
-        if (!newWindow) return alert("Unable to open print window (popup blocked)");
-        newWindow.document.write(
-            "<html><head><title>Receipt</title></head><body>"
-        );
+        if (!newWindow)
+            return alert("Unable to open print window (popup blocked)");
+        newWindow.document.write("<html><head><title>Receipt</title></head><body>");
         newWindow.document.write(lines.join("\n"));
         newWindow.document.write("</body></html>");
         newWindow.document.close();

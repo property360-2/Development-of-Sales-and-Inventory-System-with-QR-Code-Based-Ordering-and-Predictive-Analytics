@@ -7,9 +7,11 @@ import {
   FileText,
   CreditCard,
   Printer,
+  ListChecks,
 } from "lucide-react";
 import { useNavigate, Outlet } from "react-router-dom";
 import useAuthStore from "../stores/useAuthStore";
+import { Button } from "@/components/ui/button";
 
 export default function CashierLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,14 +23,15 @@ export default function CashierLayout() {
     navigate("/login");
   };
 
-  const NavButton = ({ to, icon: Icon, label, extraClass = "" }) => (
-    <button
+  const NavButton = ({ to, icon: Icon, label, colorClass = "text-white" }) => (
+    <Button
+      variant="ghost"
       onClick={() => navigate(to)}
-      className={`hover:underline flex items-center gap-1 ${extraClass}`}
+      className={`flex items-center gap-2 ${colorClass} hover:bg-white/10`}
     >
-      <Icon size={16} />
+      <Icon size={18} />
       {label}
-    </button>
+    </Button>
   );
 
   return (
@@ -43,22 +46,24 @@ export default function CashierLayout() {
         </h1>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex space-x-6 items-center">
+        <nav className="hidden md:flex space-x-4 items-center">
           <NavButton to="/cashier" icon={FileText} label="Dashboard" />
-          <NavButton to="/cashier/orders" icon={ShoppingCart} label="Orders" />
+          <NavButton to="/cashier/pos" icon={ShoppingCart} label="POS" />
+          <NavButton to="/cashier/orders" icon={ListChecks} label="Orders" />
           <NavButton
             to="/cashier/payments"
             icon={CreditCard}
             label="Payments"
           />
           <NavButton to="/cashier/receipts" icon={Printer} label="Receipts" />
-          <button
+          <Button
+            variant="ghost"
+            className="text-red-300 flex items-center gap-1 hover:bg-white/10"
             onClick={handleLogout}
-            className="text-red-300 hover:underline flex items-center gap-1"
           >
             <LogOut size={16} />
             Logout
-          </button>
+          </Button>
         </nav>
 
         {/* Mobile Hamburger */}
@@ -81,30 +86,27 @@ export default function CashierLayout() {
             className="md:hidden bg-blue-600 text-white flex flex-col space-y-2 p-4 shadow-lg"
           >
             <NavButton to="/cashier" icon={FileText} label="Dashboard" />
-            <NavButton
-              to="/cashier/orders"
-              icon={ShoppingCart}
-              label="Orders"
-            />
+            <NavButton to="/cashier/pos" icon={ShoppingCart} label="POS" />
+            <NavButton to="/cashier/orders" icon={ListChecks} label="Orders" />
             <NavButton
               to="/cashier/payments"
               icon={CreditCard}
               label="Payments"
             />
             <NavButton to="/cashier/receipts" icon={Printer} label="Receipts" />
-
-            <button
-              onClick={handleLogout}
+            <Button
+              variant="ghost"
               className="text-left text-red-300 flex items-center gap-1"
+              onClick={handleLogout}
             >
               <LogOut size={16} />
               Logout
-            </button>
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content (Outlet for nested routes) */}
+      {/* Main Content */}
       <main className="flex-1 bg-gray-50 p-6">
         <Outlet />
       </main>
