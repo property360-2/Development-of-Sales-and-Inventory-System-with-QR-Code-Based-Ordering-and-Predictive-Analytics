@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Models\AuditLog;
+// use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Store\StoreUserRequest;
 use App\Http\Requests\Update\UpdateUserRequest;
@@ -20,13 +20,13 @@ class UserController extends Controller
             ->paginate(20);
 
         $userId = Auth::id();
-        if ($userId) {
-            AuditLog::create([
-                'user_id' => $userId,
-                'action' => 'Viewed all users',
-                'timestamp' => now(),
-            ]);
-        }
+        // if ($userId) {
+        //     AuditLog::create([
+        //         'user_id' => $userId,
+        //         'action' => 'Viewed all users',
+        //         'timestamp' => now(),
+        //     ]);
+        // }
 
         return response()->json($users);
     }
@@ -37,13 +37,13 @@ class UserController extends Controller
             ->findOrFail($id);
 
         $userId = Auth::id();
-        if ($userId) {
-            AuditLog::create([
-                'user_id' => $userId,
-                'action' => 'Viewed User ID: ' . $user->user_id,
-                'timestamp' => now(),
-            ]);
-        }
+        // if ($userId) {
+        //     AuditLog::create([
+        //         'user_id' => $userId,
+        //         'action' => 'Viewed User ID: ' . $user->user_id,
+        //         'timestamp' => now(),
+        //     ]);
+        // }
 
         return response()->json($user);
     }

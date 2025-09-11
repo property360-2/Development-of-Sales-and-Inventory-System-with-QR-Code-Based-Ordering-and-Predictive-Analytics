@@ -35,11 +35,11 @@ class MenuController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed all menus (per_page=' . $perPage . ')',
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed all menus (per_page=' . $perPage . ')',
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($menus);
     }
@@ -56,11 +56,11 @@ class MenuController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed Menu ID: ' . $menu->menu_id,
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed Menu ID: ' . $menu->menu_id,
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($menu);
     }

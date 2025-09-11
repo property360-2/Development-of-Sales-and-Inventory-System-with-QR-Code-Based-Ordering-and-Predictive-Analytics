@@ -46,17 +46,18 @@ class User extends Authenticatable
         static::created(function ($user) {
             AuditLog::create([
                 'user_id' => Auth::id() ?? 1, // 1 = system user if no one logged in
-                'action' => 'Created User ID: ' . $user->user_id,
+                'action' => 'Created User: ' . $user->name . ' (' . $user->username . ')',
                 'timestamp' => now(),
             ]);
         });
 
         // When a user is updated
         static::updated(function ($user) {
-            $changes = $user->getChanges(); // only changed fields
+            $changes = collect($user->getChanges())->except(['updated_at', 'password']);
             AuditLog::create([
                 'user_id' => Auth::id() ?? 1,
-                'action' => 'Updated User ID: ' . $user->user_id . ' | Changes: ' . json_encode($changes),
+                'action' => 'Updated User: ' . $user->name . ' (' . $user->username . ')'
+                    . ' | Changes: ' . json_encode($changes),
                 'timestamp' => now(),
             ]);
         });
@@ -65,7 +66,7 @@ class User extends Authenticatable
         static::deleted(function ($user) {
             AuditLog::create([
                 'user_id' => Auth::id() ?? 1,
-                'action' => 'Deleted User ID: ' . $user->user_id,
+                'action' => 'Deleted User: ' . $user->name . ' (' . $user->username . ')',
                 'timestamp' => now(),
             ]);
         });

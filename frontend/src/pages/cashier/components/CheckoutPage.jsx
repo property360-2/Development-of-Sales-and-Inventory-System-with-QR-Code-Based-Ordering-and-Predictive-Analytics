@@ -111,17 +111,7 @@ export default function CheckoutPage() {
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             Checkout
-            <div className="relative">
-              <ShoppingCart className="w-6 h-6" />
-              {cartCount() > 0 && (
-                <span
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ transform: `scale(${cartBadgeScale})` }}
-                >
-                  {cartCount()}
-                </span>
-              )}
-            </div>
+           
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -22,21 +22,22 @@ class Customer extends Model
     ];
 
     // ----- Audit Logging -----
+// ----- Audit Logging -----
     protected static function booted()
     {
         static::created(function ($customer) {
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Created Customer ID: '.$customer->customer_id,
+                'action' => 'Created Customer: ' . $customer->customer_name,
                 'timestamp' => now(),
             ]);
         });
 
         static::updated(function ($customer) {
-            $changes = $customer->getChanges(); // only changed fields
+            $changes = collect($customer->getChanges())->except(['updated_at']);
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Updated Customer ID: '.$customer->customer_id.' | Changes: '.json_encode($changes),
+                'action' => 'Updated Customer: ' . $customer->customer_name . ' | Changes: ' . json_encode($changes),
                 'timestamp' => now(),
             ]);
         });
@@ -44,9 +45,10 @@ class Customer extends Model
         static::deleted(function ($customer) {
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Deleted Customer ID: '.$customer->customer_id,
+                'action' => 'Deleted Customer: ' . $customer->customer_name,
                 'timestamp' => now(),
             ]);
         });
     }
+
 }

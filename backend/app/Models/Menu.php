@@ -30,7 +30,7 @@ class Menu extends Model
         static::created(function ($menu) {
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Created Menu ID: ' . $menu->menu_id,
+                'action' => 'Created Menu: ' . $menu->name,
                 'timestamp' => now(),
             ]);
         });
@@ -40,20 +40,18 @@ class Menu extends Model
             if ($userId) {
                 AuditLog::create([
                     'user_id' => $userId,
-                    'action' => 'Updated Menu ID: ' . $menu->menu_id,
+                    'action' => 'Updated Menu: ' . $menu->name,
                     'timestamp' => now(),
                 ]);
             }
         });
 
-
         static::deleted(function ($menu) {
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Deleted Menu ID: ' . $menu->menu_id,
+                'action' => 'Deleted Menu: ' . $menu->name,
                 'timestamp' => now(),
             ]);
         });
     }
-
 }

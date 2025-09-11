@@ -28,11 +28,11 @@ class CustomerController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed all Customers (per_page=' . $perPage . ')',
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed all Customers (per_page=' . $perPage . ')',
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($customers);
     }
@@ -59,11 +59,11 @@ class CustomerController extends Controller
             abort(403, 'Unauthorized'); // don’t log anything if no user
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed Customer: ' . $customer->customer_id,
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed Customer: ' . $customer->customer_id,
+        //     'timestamp' => now(),
+        // ]);
 
 
         return response()->json($customer);

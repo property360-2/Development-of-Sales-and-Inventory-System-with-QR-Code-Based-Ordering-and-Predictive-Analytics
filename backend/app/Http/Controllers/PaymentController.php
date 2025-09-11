@@ -6,7 +6,7 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Http\Requests\Store\StorePaymentRequest;
 use App\Http\Requests\Update\UpdatePaymentRequest;
-use App\Models\AuditLog;
+// use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 
 class PaymentController extends Controller
@@ -29,11 +29,11 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed all Payments',
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed all Payments',
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($payments);
     }
@@ -51,11 +51,11 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed Payment ID: ' . $id,
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed Payment ID: ' . $id,
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($payment);
     }

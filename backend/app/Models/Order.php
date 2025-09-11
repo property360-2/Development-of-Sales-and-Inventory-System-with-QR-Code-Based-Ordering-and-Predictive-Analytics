@@ -57,22 +57,21 @@ class Order extends Model
     protected static function booted()
     {
         static::created(function ($order) {
-            $userId = Auth::id(); // get authenticated user
+            $userId = Auth::id();
             AuditLog::create([
-                'user_id' => $userId, // nullable if no user
-                'action' => 'Created Order ID: ' . $order->order_id,
+                'user_id' => $userId ?? 0,
+                'action' => 'Created Order for Customer: ' . ($order->customer->customer_name ?? 'Unknown'),
                 'timestamp' => now(),
             ]);
         });
 
         static::updated(function ($order) {
-            $userId = Auth::id(); // get authenticated user
-            $changes = $order->getChanges();
-
-            // Only log if there's a valid user or make user_id nullable in audit_logs
+            $userId = Auth::id();
+            $changes = collect($order->getChanges())->except(['updated_at']);
             AuditLog::create([
-                'user_id' => $userId,
-                'action' => 'Updated Order ID: ' . $order->order_id . ' | Changes: ' . json_encode($changes),
+                'user_id' => $userId ?? 0,
+                'action' => 'Updated Order for Customer: ' . ($order->customer->customer_name ?? 'Unknown') .
+                    ' | Changes: ' . json_encode($changes),
                 'timestamp' => now(),
             ]);
         });
@@ -80,8 +79,8 @@ class Order extends Model
         static::deleted(function ($order) {
             $userId = Auth::id();
             AuditLog::create([
-                'user_id' => $userId,
-                'action' => 'Deleted Order ID: ' . $order->order_id,
+                'user_id' => $userId ?? 0,
+                'action' => 'Deleted Order for Customer: ' . ($order->customer->customer_name ?? 'Unknown'),
                 'timestamp' => now(),
             ]);
         });

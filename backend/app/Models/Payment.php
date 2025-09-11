@@ -32,26 +32,31 @@ class Payment extends Model
     protected static function booted()
     {
         static::created(function ($payment) {
+            $customerName = $payment->order->customer->customer_name ?? 'Unknown';
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Created Payment ID: ' . $payment->payment_id . ' for Order ID: ' . $payment->order_id,
+                'action' => 'Created Payment of ₱' . $payment->amount_paid .
+                    ' for Customer: ' . $customerName,
                 'timestamp' => now(),
             ]);
         });
 
         static::updated(function ($payment) {
-            $changes = $payment->getChanges();
+            $changes = collect($payment->getChanges())->except(['updated_at']);
+            $customerName = $payment->order->customer->customer_name ?? 'Unknown';
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Updated Payment ID: ' . $payment->payment_id . ' | Changes: ' . json_encode($changes),
+                'action' => 'Updated Payment for Customer: ' . $customerName .
+                    ' | Changes: ' . json_encode($changes),
                 'timestamp' => now(),
             ]);
         });
 
         static::deleted(function ($payment) {
+            $customerName = $payment->order->customer->customer_name ?? 'Unknown';
             AuditLog::create([
                 'user_id' => Auth::id() ?? 0,
-                'action' => 'Deleted Payment ID: ' . $payment->payment_id,
+                'action' => 'Deleted Payment for Customer: ' . $customerName,
                 'timestamp' => now(),
             ]);
         });

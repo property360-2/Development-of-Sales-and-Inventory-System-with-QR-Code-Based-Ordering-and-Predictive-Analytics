@@ -32,12 +32,12 @@ class OrderController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Create Audit Log safely
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed all Orders (per_page=' . $perPage . ')',
-            'timestamp' => now(),
-        ]);
+        // // Create Audit Log safely
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed all Orders (per_page=' . $perPage . ')',
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($orders);
     }
@@ -88,11 +88,11 @@ class OrderController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        AuditLog::create([
-            'user_id' => $userId,
-            'action' => 'Viewed Order ID: ' . $order->order_id,
-            'timestamp' => now(),
-        ]);
+        // AuditLog::create([
+        //     'user_id' => $userId,
+        //     'action' => 'Viewed Order ID: ' . $order->order_id,
+        //     'timestamp' => now(),
+        // ]);
 
         return response()->json($order);
     }
