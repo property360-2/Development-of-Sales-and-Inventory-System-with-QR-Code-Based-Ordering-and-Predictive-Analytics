@@ -36,8 +36,13 @@ class StoreOrderRequest extends FormRequest
             'order_timestamp' => 'nullable|date_format:Y-m-d\TH:i:s',
             'expiry_timestamp' => 'nullable|date_format:Y-m-d\TH:i:s',
             'order_source' => 'required|in:QR,COUNTER',
+            'items' => 'required|array|min:1',
+            'items.*.menu_id' => 'required|exists:menus,menu_id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
         ];
     }
+
 
     public function messages(): array
     {

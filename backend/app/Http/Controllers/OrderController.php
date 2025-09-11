@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,13 +33,6 @@ class OrderController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // // Create Audit Log safely
-        // AuditLog::create([
-        //     'user_id' => $userId,
-        //     'action' => 'Viewed all Orders (per_page=' . $perPage . ')',
-        //     'timestamp' => now(),
-        // ]);
-
         return response()->json($orders);
     }
 
@@ -58,10 +52,23 @@ class OrderController extends Controller
             $data['order_source'] = strtoupper($data['order_source']);
         }
 
+        // Create order
         $order = Order::create($data);
 
+        // Save order items if provided
+        if (!empty($data['items']) && is_array($data['items'])) {
+            foreach ($data['items'] as $item) {
+                OrderItem::create([
+                    'order_id' => $order->order_id,
+                    'menu_id' => $item['menu_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+        }
+
         // Load relationships
-        $order->load(['customer', 'user', 'items', 'payments']);
+        $order->load(['customer', 'user', 'items.menu', 'payments']);
 
         return response()->json([
             'message' => 'Order created successfully.',
@@ -88,12 +95,6 @@ class OrderController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // AuditLog::create([
-        //     'user_id' => $userId,
-        //     'action' => 'Viewed Order ID: ' . $order->order_id,
-        //     'timestamp' => now(),
-        // ]);
-
         return response()->json($order);
     }
 
@@ -105,7 +106,6 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->update($request->validated());
 
-        // Audit logging handled in model
         return response()->json($order);
     }
 
@@ -115,7 +115,7 @@ class OrderController extends Controller
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
-        $order->delete(); // triggers model booted() deleted event
+        $order->delete();
 
         return response()->json(null, 204);
     }

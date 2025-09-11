@@ -4,7 +4,6 @@ import { usePOSStore } from "@/stores/usePOSStore";
 import useAuthStore from "@/stores/useAuthStore";
 import axiosInstance from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
 
 // shadcn components
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,7 @@ export default function CheckoutPage() {
   const [orderType, setOrderType] = useState("dine-in");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [amountTendered, setAmountTendered] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // prevent multiple submits
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const total = cartTotal();
   const change = useMemo(() => {
@@ -36,16 +35,15 @@ export default function CheckoutPage() {
     return Math.max(Number(amountTendered) - total, 0);
   }, [amountTendered, total]);
 
-  // Badge scale
-  const cartBadgeScale = Math.min(1 + Math.log2(cartCount() || 1) * 0.2, 2);
-
   const formatDateTime = (date) => date.toISOString().slice(0, 19);
 
   const handleCheckout = async () => {
-    if (isSubmitting || cart.length === 0) return; // prevent multiple submits
+    if (isSubmitting || cart.length === 0) return;
     setIsSubmitting(true);
 
     try {
+      const now = new Date();
+
       // 1. Create customer
       const customerData = {
         customer_name: customerName || "Test Customer",
@@ -53,7 +51,6 @@ export default function CheckoutPage() {
         order_reference: `REF-${Date.now()}`,
       };
       const customerRes = await axiosInstance.post("/customers", customerData);
-
       const customerId =
         Number(customerRes.data?.customer_id) ||
         Number(customerRes.data?.data?.customer_id) ||
@@ -61,22 +58,26 @@ export default function CheckoutPage() {
 
       if (!customerId) throw new Error("No customer_id returned from API");
 
-      // 2. Create order
-      const now = new Date();
+      // 2. Create order + items in one request
       const orderData = {
         customer_id: customerId,
         handled_by: user?.user_id || 2,
         order_type: orderType,
         status: "pending",
         total_amount: total,
-        order_timestamp: formatDateTime(now),
-        expiry_timestamp: formatDateTime(
-          new Date(now.getTime() + 60 * 60 * 1000)
-        ),
+        order_timestamp: now.toISOString().slice(0, 19),
+        expiry_timestamp: new Date(now.getTime() + 60 * 60 * 1000)
+          .toISOString()
+          .slice(0, 19),
         order_source: "Counter",
+        items: cart.map((item) => ({
+          menu_id: item.menu_id,
+          quantity: item.qty,
+          price: item.price,
+        })),
       };
-      const orderRes = await axiosInstance.post("/orders", orderData);
 
+      const orderRes = await axiosInstance.post("/orders", orderData);
       const orderId =
         Number(orderRes.data?.order_id) ||
         Number(orderRes.data?.data?.order_id) ||
@@ -90,13 +91,13 @@ export default function CheckoutPage() {
         amount_paid: total,
         payment_method: paymentMethod,
         payment_status: "completed",
-        payment_timestamp: formatDateTime(now),
+        payment_timestamp: now.toISOString().slice(0, 19),
       };
       await axiosInstance.post("/payments", paymentData);
 
-      // 4. Clear cart and navigate
+      // 4. Clear cart and redirect
       clearCart?.();
-      navigate("/pos"); // redirect to POS
+      navigate("/pos");
     } catch (err) {
       console.error("Checkout error:", err);
       alert("Checkout failed. See console for details.");
@@ -109,10 +110,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            Checkout
-           
-          </CardTitle>
+          <CardTitle className="text-xl">Checkout</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Customer Info */}
