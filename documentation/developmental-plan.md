@@ -110,8 +110,8 @@
 
 - **Cashier Dashboard**
 
-  - [in progress] Manage Orders (create/update orders, mark completed)
-  - [ ] Process Payments (cash / digital)
+  - [√] Manage Orders (create/update orders, mark completed)
+  - [√] Process Payments (cash / digital)
   - [ ] Generate Receipts (print/export functionality)
 
 - **Customer QR Page** → _To be done later_
