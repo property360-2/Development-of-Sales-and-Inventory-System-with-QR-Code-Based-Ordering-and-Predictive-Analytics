@@ -16,6 +16,49 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
+// ✅ Memoized cart item row
+const CartItemRow = React.memo(function CartItemRow({
+  item,
+  updateCartQty,
+  removeFromCart,
+}) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <div>
+        <div className="font-medium">{item.name}</div>
+        <div className="text-xs text-muted-foreground">
+          ₱{Number(item.price).toFixed(2)}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => updateCartQty(item.menu_id, -1)}
+        >
+          <Minus />
+        </Button>
+        <span className="w-6 text-center">{item.qty}</span>
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => updateCartQty(item.menu_id, 1)}
+        >
+          <Plus />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => removeFromCart(item.menu_id)}
+        >
+          <Trash2 />
+        </Button>
+      </div>
+    </div>
+  );
+});
+
 export default function CartDrawer() {
   const navigate = useNavigate();
 
@@ -31,7 +74,7 @@ export default function CartDrawer() {
 
   const goCheckout = () => {
     setCartOpen(false);
-    navigate("/cashier/checkout"); // ✅ fixed path
+    navigate("/cashier/checkout");
   };
 
   return (
@@ -52,42 +95,12 @@ export default function CartDrawer() {
             <p className="text-sm text-muted-foreground">Your cart is empty.</p>
           ) : (
             cart.map((item) => (
-              <div
+              <CartItemRow
                 key={`${item.menu_id}-${item.name}`}
-                className="flex items-center justify-between py-2"
-              >
-                <div>
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    ₱{Number(item.price).toFixed(2)}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => updateCartQty(item.menu_id, -1)}
-                  >
-                    <Minus />
-                  </Button>
-                  <span className="w-6 text-center">{item.qty}</span>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => updateCartQty(item.menu_id, 1)}
-                  >
-                    <Plus />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => removeFromCart(item.menu_id)}
-                  >
-                    <Trash2 />
-                  </Button>
-                </div>
-              </div>
+                item={item}
+                updateCartQty={updateCartQty}
+                removeFromCart={removeFromCart}
+              />
             ))
           )}
         </ScrollArea>
@@ -113,7 +126,6 @@ export default function CartDrawer() {
         <DrawerTrigger asChild>
           <Button className="lg:hidden fixed bottom-4 right-4 w-14 h-14 rounded-full shadow-lg">
             <ShoppingCart />
-            {/* Badge like an exponent */}
             {cartCount() > 0 && (
               <span className="absolute -top-1 -right-1 text-[11px] font-bold bg-red-500 text-white rounded-full px-[6px] py-[1px] leading-none">
                 {cartCount()}
@@ -121,7 +133,7 @@ export default function CartDrawer() {
             )}
           </Button>
         </DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent side="right">
           <DrawerHeader>
             <DrawerTitle>Cart</DrawerTitle>
             <DrawerDescription>
@@ -137,42 +149,12 @@ export default function CartDrawer() {
                 </p>
               ) : (
                 cart.map((item) => (
-                  <div
+                  <CartItemRow
                     key={`${item.menu_id}-${item.name}`}
-                    className="flex items-center justify-between py-2"
-                  >
-                    <div>
-                      <div className="font-medium">{item.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        ₱{Number(item.price).toFixed(2)}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => updateCartQty(item.menu_id, -1)}
-                      >
-                        <Minus />
-                      </Button>
-                      <span className="w-6 text-center">{item.qty}</span>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => updateCartQty(item.menu_id, 1)}
-                      >
-                        <Plus />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => removeFromCart(item.menu_id)}
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
-                  </div>
+                    item={item}
+                    updateCartQty={updateCartQty}
+                    removeFromCart={removeFromCart}
+                  />
                 ))
               )}
             </ScrollArea>

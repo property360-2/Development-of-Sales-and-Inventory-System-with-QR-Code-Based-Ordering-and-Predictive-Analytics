@@ -105,14 +105,59 @@
 
 - **Admin Panel**
   - [√] Manage Menus (CRUD for products/menu items)
-  - [√] Manage Users (CRUD for system users, roles) 
+  - [√] Manage Users (CRUD for system users, roles)
   - [√] View Audit Logs (track login & important actions), this sucks, later to be updated in backend di sya clear bro
 
-- **Cashier Dashboard**
+# Cashier Dashboard Features
 
-  - [√] Manage Orders (create/update orders, mark completed)
-  - [√] Process Payments (cash / digital)
-  - [ ] Generate Receipts (print/export functionality)
+- **Manage Orders**
+
+  - [√] Create new orders from menu grid
+  - [√] Update order status (Pending → Preparing → Ready → Served)
+  - [√] Search & filter orders by status or customer
+  - [√] View detailed order info in modal
+  - [√] Optimistic status updates with React Query (faster UI feedback)
+
+- **Process Payments**
+
+  - [√] Support multiple payment methods (Cash, Card, GCash)
+  - [√] Simple dialog for selecting payment method
+  - [√] Store chosen method in POS store for consistency
+  - [√] Quick “Go Back” and “Confirm” actions for cashier efficiency
+
+- **Generate Receipts**
+
+  - [ ] Print receipts (thermal printer format)
+  - [ ] Export receipt to PDF
+  - [ ] Auto-include order details, totals, and payment method
+  - [ ] Add business info & timestamp headers
+  - [ ] Provide reprint option for past orders
+
+- **Cart & Checkout**
+
+  - [√] Add/remove menu items to cart
+  - [√] Adjust quantity with + / – buttons
+  - [√] Auto-calculate totals (real-time updates)
+  - [√] Responsive drawer (right side on desktop, bottom sheet on mobile)
+  - [√] Badge indicator for number of items in cart
+  - [√] Navigate to checkout page
+
+- **Menu Grid**
+
+  - [√] Paginated menu display (24 items per page)
+  - [√] Category filtering (Food, Beverages, Dessert, Snack, All)
+  - [√] Search bar with live filtering
+  - [√] Optimized rendering via `React.memo` for menu cards
+  - [√] Add to cart button per item
+
+- **Performance Optimizations**
+
+  - [√] Stable callbacks & memoized list items
+  - [√] Avoided unnecessary re-renders (Cart, Menu, Orders)
+  - [√] Table layout fixed width (no horizontal scroll in fast-paced env)
+  - [√] Responsive design for mobile + large screens
+  - [√] Debounced search to reduce query spam
+  - [√] Auto-scroll orders panel to top on refresh
 
 - **Customer QR Page** → _To be done later_
   - Scan QR

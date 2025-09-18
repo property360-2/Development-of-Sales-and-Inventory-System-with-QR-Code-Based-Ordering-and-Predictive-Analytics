@@ -1,5 +1,5 @@
 // frontend/src/pages/cashier/components/MenuGrid.jsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../../api/axiosInstance";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,29 @@ import { Search } from "lucide-react";
 
 const CATEGORIES = ["all", "food", "beverages", "dessert", "snack"];
 
+// ✅ Memoized Card Component
+const MenuCard = React.memo(function MenuCard({ item, onAdd }) {
+  return (
+    <Card
+      key={item.menu_id ?? item.id}
+      className="rounded-xl shadow hover:shadow-lg transition overflow-hidden"
+    >
+      <CardContent className="flex flex-col items-center p-4">
+        <div className="text-center">
+          <div className="font-semibold text-lg">{item.name}</div>
+          <div className="text-xs text-muted-foreground">{item.category}</div>
+          <div className="mt-2 font-bold text-primary">
+            ₱{Number(item.price).toFixed(2)}
+          </div>
+        </div>
+        <Button className="mt-4 w-full" onClick={() => onAdd(item)}>
+          Add to Cart
+        </Button>
+      </CardContent>
+    </Card>
+  );
+});
+
 export default function MenuGrid() {
   const addToCart = usePOSStore((s) => s.addToCart);
   const [page, setPage] = useState(1);
@@ -26,6 +49,9 @@ export default function MenuGrid() {
   const selectedCategory = usePOSStore((s) => s.selectedCategory);
   const setSearch = usePOSStore((s) => s.setSearch);
   const setSelectedCategory = usePOSStore((s) => s.setSelectedCategory);
+
+  // ✅ Stable callback to prevent re-renders
+  const handleAdd = useCallback((item) => addToCart(item), [addToCart]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["menus", page, perPage],
@@ -87,25 +113,7 @@ export default function MenuGrid() {
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {filteredMenus.map((m) => (
-          <Card
-            key={m.menu_id ?? m.id}
-            className="rounded-xl shadow hover:shadow-lg transition overflow-hidden"
-          >
-            <CardContent className="flex flex-col items-center p-4">
-              <div className="text-center">
-                <div className="font-semibold text-lg">{m.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {m.category}
-                </div>
-                <div className="mt-2 font-bold text-primary">
-                  ₱{Number(m.price).toFixed(2)}
-                </div>
-              </div>
-              <Button className="mt-4 w-full" onClick={() => addToCart(m)}>
-                Add to Cart
-              </Button>
-            </CardContent>
-          </Card>
+          <MenuCard key={m.menu_id ?? m.id} item={m} onAdd={handleAdd} />
         ))}
       </div>
 

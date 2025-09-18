@@ -1,4 +1,3 @@
-// frontend/src/pages/cashier/components/PaymentDialog.jsx
 import React from "react";
 import { usePOSStore } from "../../../stores/usePOSStore";
 import {
@@ -11,12 +10,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useNavigate } from "react-router-dom";
 
 export default function PaymentDialog() {
   const open = usePOSStore((s) => s.paymentDialogOpen);
   const setOpen = usePOSStore((s) => s.setPaymentDialogOpen);
   const paymentMethod = usePOSStore((s) => s.paymentMethod);
   const setPaymentMethod = usePOSStore((s) => s.setPaymentMethod);
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    setOpen(false);
+    navigate(-1); // ⬅️ go back one step in history
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -46,6 +52,9 @@ export default function PaymentDialog() {
         </RadioGroup>
 
         <div className="flex justify-end gap-2 pt-2">
+          <Button variant="outline" onClick={handleGoBack}>
+            Go Back
+          </Button>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Close
           </Button>

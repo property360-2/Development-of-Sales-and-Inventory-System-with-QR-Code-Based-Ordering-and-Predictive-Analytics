@@ -97,7 +97,7 @@ export default function CheckoutPage() {
 
       // 4. Clear cart and redirect
       clearCart?.();
-      navigate("/pos");
+      navigate("/cashier/pos", { replace: true }); // <- fixed: go back to POS
     } catch (err) {
       console.error("Checkout error:", err);
       alert("Checkout failed. See console for details.");
