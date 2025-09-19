@@ -49,21 +49,7 @@ export default function CashierLayout() {
         <nav className="hidden md:flex space-x-4 items-center">
           <NavButton to="/cashier" icon={FileText} label="Dashboard" />
           <NavButton to="/cashier/pos" icon={ShoppingCart} label="POS" />
-          <NavButton to="/cashier/orders" icon={ListChecks} label="Orders" />
-          <NavButton
-            to="/cashier/payments"
-            icon={CreditCard}
-            label="Payments"
-          />
-          <NavButton to="/cashier/receipts" icon={Printer} label="Receipts" />
-          <Button
-            variant="ghost"
-            className="text-red-300 flex items-center gap-1 hover:bg-white/10"
-            onClick={handleLogout}
-          >
-            <LogOut size={16} />
-            Logout
-          </Button>
+          <NavButton to="/cashier/orders" icon={ListChecks} label="Orders History" />
         </nav>
 
         {/* Mobile Hamburger */}
@@ -87,21 +73,7 @@ export default function CashierLayout() {
           >
             <NavButton to="/cashier" icon={FileText} label="Dashboard" />
             <NavButton to="/cashier/pos" icon={ShoppingCart} label="POS" />
-            <NavButton to="/cashier/orders" icon={ListChecks} label="Orders" />
-            <NavButton
-              to="/cashier/payments"
-              icon={CreditCard}
-              label="Payments"
-            />
-            <NavButton to="/cashier/receipts" icon={Printer} label="Receipts" />
-            <Button
-              variant="ghost"
-              className="text-left text-red-300 flex items-center gap-1"
-              onClick={handleLogout}
-            >
-              <LogOut size={16} />
-              Logout
-            </Button>
+            <NavButton to="/cashier/orders" icon={ListChecks} label="Orders History" />
           </motion.div>
         )}
       </AnimatePresence>
