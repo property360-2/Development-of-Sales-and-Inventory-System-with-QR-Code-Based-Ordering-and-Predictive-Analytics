@@ -18,8 +18,9 @@ class PaymentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
 
-        $payments = Payment::with([
-            'order:id,order_id,customer_id,total_amount,status,order_timestamp'
+        $payments = Payment::
+        with([
+            'order:order_id,customer_id,total_amount,status,order_timestamp'
         ])
             ->select('payment_id', 'order_id', 'amount_paid', 'payment_method', 'payment_status', 'payment_timestamp')
             ->paginate($perPage);
@@ -41,7 +42,7 @@ class PaymentController extends Controller
     public function show($id)
     {
         $payment = Payment::with([
-            'order:id,order_id,customer_id,total_amount,status,order_timestamp'
+            'order:order_id,customer_id,total_amount,status,order_timestamp'
         ])
             ->select('payment_id', 'order_id', 'amount_paid', 'payment_method', 'payment_status', 'payment_timestamp')
             ->findOrFail($id);
