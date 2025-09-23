@@ -14,6 +14,13 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, Eye } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as HoverCard from "@radix-ui/react-hover-card";
@@ -92,6 +99,11 @@ export default function CashierOrders() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [viewOrder, setViewOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [methodFilter, setMethodFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all"); // Today / Last7 / Last30 / All
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   // Debounce search
   useEffect(() => {
@@ -99,12 +111,13 @@ export default function CashierOrders() {
     return () => clearTimeout(t);
   }, [search]);
 
-  // -----------------------
   // Queries
-  // -----------------------
   const ordersQuery = useQuery({
-    queryKey: ["orders"],
-    queryFn: async () => (await axiosInstance.get("/orders")).data,
+    queryKey: ["orders", page, perPage],
+    queryFn: async () =>
+      (await axiosInstance.get(`/orders?page=${page}&per_page=${perPage}`))
+        .data,
+    keepPreviousData: true,
   });
 
   const paymentsQuery = useQuery({
@@ -117,9 +130,7 @@ export default function CashierOrders() {
     queryFn: async () => (await axiosInstance.get("/customers")).data,
   });
 
-  // -----------------------
   // Merge orders with customer & payment info
-  // -----------------------
   const mergedOrders = useMemo(() => {
     const orders = ordersQuery.data?.data || [];
     const payments = paymentsQuery.data?.data || paymentsQuery.data || [];
@@ -140,16 +151,33 @@ export default function CashierOrders() {
     });
   }, [ordersQuery.data, paymentsQuery.data, customersQuery.data]);
 
-  // -----------------------
   // Filtered orders
-  // -----------------------
-  const filtered = mergedOrders.filter((row) => {
-    const q = debounced.toLowerCase();
-    return (
-      row.order_id.toString().includes(q) ||
-      row.customer_name.toLowerCase().includes(q)
-    );
-  });
+  const filteredOrders = useMemo(() => {
+    const now = new Date();
+    return mergedOrders.filter((order) => {
+      const q = debounced.toLowerCase();
+      const matchesSearch =
+        order.order_id.toString().includes(q) ||
+        order.customer_name.toLowerCase().includes(q);
+      const matchesStatus =
+        statusFilter === "all" || order.payment_status === statusFilter;
+      const matchesMethod =
+        methodFilter === "all" || order.payment_method === methodFilter;
+
+      // Date filter
+      const orderDate = new Date(order.order_timestamp);
+      let matchesDate = true;
+      if (dateFilter === "today") {
+        matchesDate = orderDate.toDateString() === now.toDateString();
+      } else if (dateFilter === "last7") {
+        matchesDate = (now - orderDate) / (1000 * 60 * 60 * 24) <= 7;
+      } else if (dateFilter === "last30") {
+        matchesDate = (now - orderDate) / (1000 * 60 * 60 * 24) <= 30;
+      }
+
+      return matchesSearch && matchesStatus && matchesMethod && matchesDate;
+    });
+  }, [mergedOrders, debounced, statusFilter, methodFilter, dateFilter]);
 
   if (
     ordersQuery.isLoading ||
@@ -157,16 +185,13 @@ export default function CashierOrders() {
     customersQuery.isLoading
   )
     return <p className="p-4">Loading orders…</p>;
-
   if (ordersQuery.error || paymentsQuery.error || customersQuery.error)
     return <p className="p-4">Error fetching orders.</p>;
 
-  // -----------------------
-  // JSX
-  // -----------------------
   return (
     <div className="p-4">
-      <div className="mb-4 flex items-center justify-between">
+      {/* Header + Search */}
+      <div className="mb-4 flex flex-wrap items-center gap-2 justify-between">
         <h1 className="text-2xl font-bold">Orders</h1>
         <Input
           placeholder="Search by order ID or customer name…"
@@ -176,6 +201,60 @@ export default function CashierOrders() {
         />
       </div>
 
+      {/* Filters */}
+      <div className="mb-4 flex flex-wrap gap-2 items-center">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Payment Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="Paid">Paid</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Completed">Completed</SelectItem>
+            <SelectItem value="Failed">Failed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={methodFilter} onValueChange={setMethodFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Payment Method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Methods</SelectItem>
+            <SelectItem value="Cash">Cash</SelectItem>
+            <SelectItem value="GCash">GCash</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={dateFilter} onValueChange={setDateFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="Date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Dates</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="last7">Last 7 Days</SelectItem>
+            <SelectItem value="last30">Last 30 Days</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Reset Filters */}
+        <Button
+          variant="outline"
+          onClick={() => {
+            setStatusFilter("all");
+            setMethodFilter("all");
+            setDateFilter("all");
+            setDebounced("");
+            setSearch("");
+          }}
+        >
+          Reset Filters
+        </Button>
+      </div>
+
+      {/* Table */}
       <Table>
         <TableHeader>
           <TableRow>
@@ -190,7 +269,7 @@ export default function CashierOrders() {
         </TableHeader>
 
         <TableBody>
-          {filtered.map((row) => (
+          {filteredOrders.map((row) => (
             <TableRow key={row.order_id}>
               <TableCell>{row.order_id}</TableCell>
               <TableCell>{row.customer_name}</TableCell>
@@ -205,9 +284,7 @@ export default function CashierOrders() {
                     })
                   : "—"}
               </TableCell>
-
               <TableCell className="flex gap-2">
-                {/* HoverCard + Eye modal */}
                 <HoverCard.Root>
                   <HoverCard.Trigger asChild>
                     <Button
@@ -236,7 +313,7 @@ export default function CashierOrders() {
             </TableRow>
           ))}
 
-          {filtered.length === 0 && (
+          {filteredOrders.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -249,6 +326,52 @@ export default function CashierOrders() {
         </TableBody>
       </Table>
 
+      {/* Pagination */}
+      {ordersQuery.data && (
+        <div className="mt-4 flex items-center justify-between">
+          <p>
+            Page {ordersQuery.data.current_page} of {ordersQuery.data.last_page}{" "}
+            (Total: {ordersQuery.data.total})
+          </p>
+          <div className="flex items-center gap-4">
+            <Select
+              value={String(perPage)}
+              onValueChange={(v) => {
+                setPerPage(Number(v));
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-28">
+                <SelectValue placeholder="Per page" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 per page</SelectItem>
+                <SelectItem value="20">20 per page</SelectItem>
+                <SelectItem value="50">50 per page</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex gap-2">
+              <Button
+                disabled={ordersQuery.data.current_page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </Button>
+              <Button
+                disabled={
+                  ordersQuery.data.current_page === ordersQuery.data.last_page
+                }
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Order Modal */}
       {viewOrder && (
         <ViewOrderModal
           isOpen={!!viewOrder}
