@@ -1,4 +1,3 @@
-// src/pages/admin/AdminUsers.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../api/axiosInstance";
@@ -62,12 +61,9 @@ function UserModal({ isOpen, onClose, initialData, onSubmit }) {
     e.preventDefault();
     const payload = { ...formData };
 
-    // If editing and password is blank, remove it
     if (isEdit && !payload.password) {
       delete payload.password;
     }
-
-    // If editing and username is unchanged, remove it
     if (isEdit && payload.username === initialData.username) {
       delete payload.username;
     }
@@ -100,7 +96,6 @@ function UserModal({ isOpen, onClose, initialData, onSubmit }) {
             }
             required
           />
-
           <Input
             type="password"
             placeholder={isEdit ? "Password (leave blank to keep)" : "Password"}
@@ -110,9 +105,8 @@ function UserModal({ isOpen, onClose, initialData, onSubmit }) {
             }
             {...(isEdit ? {} : { required: true })}
           />
-
           <Select
-            value={formData.role} // <-- this should always reflect current role
+            value={formData.role}
             onValueChange={(value) =>
               setFormData((s) => ({ ...s, role: value }))
             }
@@ -125,7 +119,6 @@ function UserModal({ isOpen, onClose, initialData, onSubmit }) {
               <SelectItem value="Cashier">Cashier</SelectItem>
             </SelectContent>
           </Select>
-
           <Input
             placeholder="Contact number (optional)"
             value={formData.contact_number}
@@ -185,31 +178,26 @@ export default function AdminUsers() {
   const [debounced, setDebounced] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
 
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
-
   const queryClient = useQueryClient();
 
-  // debounce search
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  // query
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["users", page, perPage],
+  // fetch all users at once (no pagination)
+  const {
+    data: users = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["users"],
     queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/users?page=${page}&per_page=${perPage}`
-      );
-      return res.data;
+      const res = await axiosInstance.get("/users");
+      return Array.isArray(res.data) ? res.data : res.data?.data ?? [];
     },
-    keepPreviousData: true,
+    staleTime: 5000,
   });
-
-  const users = data?.data ?? [];
-  const meta = data;
 
   const filtered = useMemo(() => {
     const q = debounced.trim().toLowerCase();
@@ -225,7 +213,7 @@ export default function AdminUsers() {
   }, [users, debounced, roleFilter]);
 
   /* ---------------------------
-     Mutations (must be above return!)
+     Mutations
   --------------------------- */
   const addUser = useMutation({
     mutationFn: (payload) => axiosInstance.post("/users", payload),
@@ -233,7 +221,6 @@ export default function AdminUsers() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setAddOpen(false);
       toast.success(`"${variables.name}" has been added!`);
-      setPage(1);
     },
     onError: (e) => {
       const msg = e?.response?.data?.message || "Failed to add user.";
@@ -357,49 +344,6 @@ export default function AdminUsers() {
         </TableBody>
       </Table>
 
-      {/* Pagination */}
-      {meta && (
-        <div className="mt-4 flex items-center justify-between">
-          <p>
-            Page {meta.current_page} of {meta.last_page} (Total: {meta.total})
-          </p>
-
-          <div className="flex items-center gap-4">
-            <Select
-              value={String(perPage)}
-              onValueChange={(v) => {
-                setPerPage(Number(v));
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-28">
-                <SelectValue placeholder="Per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10 per page</SelectItem>
-                <SelectItem value="20">20 per page</SelectItem>
-                <SelectItem value="50">50 per page</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2">
-              <Button
-                disabled={meta.current_page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </Button>
-              <Button
-                disabled={meta.current_page === meta.last_page}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Modals */}
       {addOpen && (
         <UserModal
@@ -408,7 +352,6 @@ export default function AdminUsers() {
           onSubmit={(payload) => addUser.mutate(payload)}
         />
       )}
-
       {editData && (
         <UserModal
           isOpen={!!editData}
@@ -419,7 +362,6 @@ export default function AdminUsers() {
           }
         />
       )}
-
       {deleteData && (
         <ConfirmDeleteModal
           isOpen={!!deleteData}

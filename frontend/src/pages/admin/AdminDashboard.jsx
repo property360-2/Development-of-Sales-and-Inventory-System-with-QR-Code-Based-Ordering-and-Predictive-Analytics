@@ -5,7 +5,14 @@ import useAuthStore from "../../stores/useAuthStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Users, BookOpen, Utensils, LogOut, Quote } from "lucide-react";
+import {
+  Users,
+  BookOpen,
+  Utensils,
+  LogOut,
+  Quote,
+  UserCircle,
+} from "lucide-react";
 
 export default function AdminDashboard() {
   const { user, logout } = useAuthStore();
@@ -50,7 +57,6 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          {/* Welcome, {user?.username} 👋 */}
           Welcome, Admin 👋
         </motion.h1>
         <Button
@@ -73,7 +79,7 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* Quick Actions / Management Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <motion.div whileHover={{ scale: 1.05 }}>
           <Card
             onClick={() => navigate("/admin/menus")}
@@ -99,6 +105,21 @@ export default function AdminDashboard() {
               <h2 className="font-bold text-lg">User Management</h2>
               <p className="text-gray-500 text-sm mt-2">
                 Create, view, and manage system users.
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <Card
+            onClick={() => navigate("/admin/customers")}
+            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
+          >
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <UserCircle className="text-orange-600 mb-3" size={36} />
+              <h2 className="font-bold text-lg">Customer Management</h2>
+              <p className="text-gray-500 text-sm mt-2">
+                View and manage customer records.
               </p>
             </CardContent>
           </Card>

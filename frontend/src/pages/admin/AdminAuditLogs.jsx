@@ -1,4 +1,3 @@
-// ayusin yung audit trail sa backend, tangina hirap i-fetch sa frontend AHHAAHAHAH , dapat di ko na ginawang raw eh
 // src/pages/admin/AdminAuditLogs.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,43 +20,49 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function AdminAuditLogs() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
   const [roleFilter, setRoleFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
 
-  // debounce search input
+  const [page, setPage] = useState(1);
+  const perPage = 20; // frontend pagination size
+
+  // Debounce search
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(search), 300);
+    const t = setTimeout(() => setDebounced(search.trim()), 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  // fetch logs
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["audit-logs", page, perPage],
+  // ✅ Fetch all logs (plain array, no .data wrapper)
+  const {
+    data: logs = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["audit-logs"],
     queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/audit-logs?page=${page}&per_page=${perPage}`
-      );
-      return res.data;
+      const res = await axiosInstance.get("/audit-logs");
+      // console.log("Audit logs response:", res.data); // 👀 debug
+      return res.data ?? [];
     },
-    keepPreviousData: true,
+    staleTime: 5_000,
+    refetchInterval: 10_000,
   });
 
-  const logs = data?.data ?? [];
-  const meta = data;
-
-  // search + filters (client-side)
+  // ✅ Client-side filters
   const filtered = useMemo(() => {
-    const q = debounced.trim().toLowerCase();
+    const q = debounced.toLowerCase();
+    const now = new Date();
+
     return logs.filter((log) => {
       const matchesSearch =
         !q ||
-        log.action.toLowerCase().includes(q) ||
+        log.action?.toLowerCase().includes(q) ||
         log.user?.name?.toLowerCase().includes(q) ||
         log.user?.role?.toLowerCase().includes(q);
 
@@ -66,11 +71,45 @@ export default function AdminAuditLogs() {
 
       const matchesAction =
         actionFilter === "all" ||
-        log.action.toLowerCase().startsWith(actionFilter);
+        log.action?.toLowerCase().startsWith(actionFilter);
 
-      return matchesSearch && matchesRole && matchesAction;
+      // ✅ Date filter
+      const ts = log.timestamp ? new Date(log.timestamp) : null;
+      let matchesDate = true;
+
+      if (dateFilter !== "all" && ts) {
+        const diffDays = (now - ts) / (1000 * 60 * 60 * 24);
+
+        switch (dateFilter) {
+          case "today":
+            matchesDate = ts.toDateString() === now.toDateString();
+            break;
+          case "3days":
+            matchesDate = diffDays <= 3;
+            break;
+          case "7days":
+            matchesDate = diffDays <= 7;
+            break;
+          case "30days":
+            matchesDate = diffDays <= 30;
+            break;
+          default:
+            matchesDate = true;
+        }
+      }
+
+      return matchesSearch && matchesRole && matchesAction && matchesDate;
     });
-  }, [logs, debounced, roleFilter, actionFilter]);
+  }, [logs, debounced, roleFilter, actionFilter, dateFilter]);
+
+  // ✅ Frontend pagination
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+
+  // Reset page when filters/search change
+  useEffect(() => {
+    setPage(1);
+  }, [debounced, roleFilter, actionFilter, dateFilter]);
 
   if (isLoading) return <p className="p-4">Loading audit logs…</p>;
   if (error) return <p className="p-4">Error fetching audit logs.</p>;
@@ -82,7 +121,7 @@ export default function AdminAuditLogs() {
         <h1 className="text-2xl font-bold">Audit Logs</h1>
       </div>
 
-      {/* Search + Filters */}
+      {/* Filters */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative w-full max-w-sm">
@@ -123,6 +162,20 @@ export default function AdminAuditLogs() {
             <SelectItem value="viewed">Viewed</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Date Filter */}
+        <Select value={dateFilter} onValueChange={setDateFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="3days">Last 3 Days</SelectItem>
+            <SelectItem value="7days">Last 7 Days</SelectItem>
+            <SelectItem value="30days">Last 30 Days</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
@@ -137,7 +190,7 @@ export default function AdminAuditLogs() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filtered.map((log) => (
+          {paginated.map((log) => (
             <TableRow key={log.log_id}>
               <TableCell>{log.log_id}</TableCell>
               <TableCell>{log.user?.name ?? "—"}</TableCell>
@@ -146,12 +199,17 @@ export default function AdminAuditLogs() {
                 {log.action}
               </TableCell>
               <TableCell>
-                {log.timestamp ? new Date(log.timestamp).toLocaleString() : "—"}
+                {log.timestamp
+                  ? new Date(log.timestamp).toLocaleString("en-PH", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })
+                  : "—"}
               </TableCell>
             </TableRow>
           ))}
 
-          {filtered.length === 0 && (
+          {paginated.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={5}
@@ -164,31 +222,26 @@ export default function AdminAuditLogs() {
         </TableBody>
       </Table>
 
-      {/* Pagination */}
-      {meta && (
-        <div className="mt-4 flex items-center justify-between">
-          <p>
-            Page {meta.current_page} of {meta.last_page} (Total: {meta.total})
-          </p>
-
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <button
-                className="px-3 py-1 rounded border disabled:opacity-50"
-                disabled={meta.current_page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </button>
-              <button
-                className="px-3 py-1 rounded border disabled:opacity-50"
-                disabled={meta.current_page === meta.last_page}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </button>
-            </div>
-          </div>
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-4">
+          <Button
+            variant="outline"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </Button>
+          <span className="text-sm">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </div>
       )}
     </div>

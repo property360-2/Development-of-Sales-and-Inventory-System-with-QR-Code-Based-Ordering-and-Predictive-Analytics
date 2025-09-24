@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -102,8 +101,6 @@ export default function CashierOrders() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all"); // Today / Last7 / Last30 / All
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
 
   // Debounce search
   useEffect(() => {
@@ -113,11 +110,8 @@ export default function CashierOrders() {
 
   // Queries
   const ordersQuery = useQuery({
-    queryKey: ["orders", page, perPage],
-    queryFn: async () =>
-      (await axiosInstance.get(`/orders?page=${page}&per_page=${perPage}`))
-        .data,
-    keepPreviousData: true,
+    queryKey: ["orders"],
+    queryFn: async () => (await axiosInstance.get("/orders")).data,
   });
 
   const paymentsQuery = useQuery({
@@ -132,9 +126,9 @@ export default function CashierOrders() {
 
   // Merge orders with customer & payment info
   const mergedOrders = useMemo(() => {
-    const orders = ordersQuery.data?.data || [];
-    const payments = paymentsQuery.data?.data || paymentsQuery.data || [];
-    const customers = customersQuery.data?.data || [];
+    const orders = ordersQuery.data || [];
+    const payments = paymentsQuery.data || [];
+    const customers = customersQuery.data || [];
 
     return orders.map((order) => {
       const customer = customers.find(
@@ -167,13 +161,12 @@ export default function CashierOrders() {
       // Date filter
       const orderDate = new Date(order.order_timestamp);
       let matchesDate = true;
-      if (dateFilter === "today") {
+      if (dateFilter === "today")
         matchesDate = orderDate.toDateString() === now.toDateString();
-      } else if (dateFilter === "last7") {
+      else if (dateFilter === "last7")
         matchesDate = (now - orderDate) / (1000 * 60 * 60 * 24) <= 7;
-      } else if (dateFilter === "last30") {
+      else if (dateFilter === "last30")
         matchesDate = (now - orderDate) / (1000 * 60 * 60 * 24) <= 30;
-      }
 
       return matchesSearch && matchesStatus && matchesMethod && matchesDate;
     });
@@ -239,7 +232,6 @@ export default function CashierOrders() {
           </SelectContent>
         </Select>
 
-        {/* Reset Filters */}
         <Button
           variant="outline"
           onClick={() => {
@@ -325,51 +317,6 @@ export default function CashierOrders() {
           )}
         </TableBody>
       </Table>
-
-      {/* Pagination */}
-      {ordersQuery.data && (
-        <div className="mt-4 flex items-center justify-between">
-          <p>
-            Page {ordersQuery.data.current_page} of {ordersQuery.data.last_page}{" "}
-            (Total: {ordersQuery.data.total})
-          </p>
-          <div className="flex items-center gap-4">
-            <Select
-              value={String(perPage)}
-              onValueChange={(v) => {
-                setPerPage(Number(v));
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-28">
-                <SelectValue placeholder="Per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10 per page</SelectItem>
-                <SelectItem value="20">20 per page</SelectItem>
-                <SelectItem value="50">50 per page</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2">
-              <Button
-                disabled={ordersQuery.data.current_page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </Button>
-              <Button
-                disabled={
-                  ordersQuery.data.current_page === ordersQuery.data.last_page
-                }
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* View Order Modal */}
       {viewOrder && (

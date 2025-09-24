@@ -42,7 +42,7 @@ const statusBadgeClass = (status) => {
   }
 };
 
-/* ✅ Memoized Row for Desktop */
+/* Memoized Desktop Row */
 const OrderRow = React.memo(function OrderRow({
   order,
   onView,
@@ -51,20 +51,15 @@ const OrderRow = React.memo(function OrderRow({
 }) {
   return (
     <tr key={order.order_id ?? order.id} className="border-t">
-      {/* ID */}
       <td className="py-3 align-top">{order.order_id ?? order.id}</td>
-
-      {/* Customer */}
       <td className="py-3 align-top">
         <div
           className="truncate max-w-[20ch] whitespace-nowrap"
-          title={order.customer?.customer_name ?? order.customer_name ?? "—"}
+          title={order.customer?.customer_name ?? "—"}
         >
-          {order.customer?.customer_name ?? order.customer_name ?? "—"}
+          {order.customer?.customer_name ?? "—"}
         </div>
       </td>
-
-      {/* Status */}
       <td className="py-3 align-top">
         <span
           className={`inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium ${statusBadgeClass(
@@ -74,8 +69,6 @@ const OrderRow = React.memo(function OrderRow({
           {order.status}
         </span>
       </td>
-
-      {/* Actions */}
       <td className="py-3 align-top text-right">
         <div className="inline-flex items-center justify-end gap-1">
           <Button
@@ -88,7 +81,6 @@ const OrderRow = React.memo(function OrderRow({
           >
             <Eye className="w-4 h-4" />
           </Button>
-
           <Button
             size="icon"
             variant="default"
@@ -106,7 +98,7 @@ const OrderRow = React.memo(function OrderRow({
   );
 });
 
-/* ✅ Memoized Card for Mobile */
+/* Memoized Mobile Card */
 const MobileOrderCard = React.memo(function MobileOrderCard({
   order,
   onView,
@@ -125,10 +117,9 @@ const MobileOrderCard = React.memo(function MobileOrderCard({
           </div>
           <div
             className="text-sm text-muted-foreground mt-1 truncate"
-            title={order.customer?.customer_name ?? order.customer_name ?? "—"}
+            title={order.customer?.customer_name ?? "—"}
           >
-            Customer:{" "}
-            {order.customer?.customer_name ?? order.customer_name ?? "—"}
+            Customer: {order.customer?.customer_name ?? "—"}
           </div>
           <div className="text-sm capitalize mt-1">
             <span
@@ -140,7 +131,6 @@ const MobileOrderCard = React.memo(function MobileOrderCard({
             </span>
           </div>
         </div>
-
         <div className="flex flex-col gap-1 ml-2">
           <Button size="sm" variant="outline" onClick={() => onView(order)}>
             <Eye className="w-4 h-4 mr-1" /> View
@@ -161,36 +151,46 @@ const MobileOrderCard = React.memo(function MobileOrderCard({
 
 export default function OrdersPanel() {
   const setViewOrder = usePOSStore((s) => s.setViewOrder);
-
   const [orderSearch, setOrderSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [showOrdersPanel, setShowOrdersPanel] = useState(false);
-
   const queryClient = useQueryClient();
   const contentRef = useRef(null);
 
-  /* ✅ Debounced search */
+  /* Debounce search */
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(orderSearch.trim()), 300);
     return () => clearTimeout(t);
   }, [orderSearch]);
 
+  /* Fetch all orders at once */
   const { data: ordersData = [], isLoading } = useQuery({
-    queryKey: ["orders", orderStatusFilter, debouncedSearch],
+    queryKey: ["orders"],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (orderStatusFilter !== "all")
-        params.append("status", orderStatusFilter);
-      if (debouncedSearch) params.append("q", debouncedSearch);
-      const res = await axiosInstance.get(`/orders?${params.toString()}`);
-      return res.data?.data ?? [];
+      const res = await axiosInstance.get("/orders"); // fetch all
+      return res.data ?? [];
     },
     staleTime: 5_000,
-    keepPreviousData: true,
     refetchInterval: 8_000,
   });
 
+  /* Filter orders client-side */
+  const filteredOrders = useMemo(
+    () =>
+      (ordersData ?? []).filter(
+        (o) =>
+          o.status !== "served" &&
+          (orderStatusFilter === "all" || o.status === orderStatusFilter) &&
+          (!debouncedSearch ||
+            o.customer?.customer_name
+              .toLowerCase()
+              .includes(debouncedSearch.toLowerCase()))
+      ),
+    [ordersData, orderStatusFilter, debouncedSearch]
+  );
+
+  /* Update order status */
   const updateOrderStatus = useMutation({
     mutationFn: async ({ orderId, newStatus }) => {
       await axiosInstance.patch(`/orders/${orderId}`, { status: newStatus });
@@ -198,34 +198,26 @@ export default function OrdersPanel() {
     },
     onMutate: async ({ orderId, newStatus }) => {
       await queryClient.cancelQueries(["orders"]);
-      const key = ["orders", orderStatusFilter, debouncedSearch];
-      const previousOrders = queryClient.getQueryData(key);
-      queryClient.setQueryData(key, (old = []) =>
+      const previousOrders = queryClient.getQueryData(["orders"]);
+      queryClient.setQueryData(["orders"], (old = []) =>
         old.map((o) =>
           o.order_id === orderId ? { ...o, status: newStatus } : o
         )
       );
-      return { previousOrders, key };
+      return { previousOrders };
     },
     onError: (_, __, context) => {
-      if (context?.previousOrders && context?.key) {
-        queryClient.setQueryData(context.key, context.previousOrders);
+      if (context?.previousOrders) {
+        queryClient.setQueryData(["orders"], context.previousOrders);
       }
     },
     onSettled: () => queryClient.invalidateQueries(["orders"]),
   });
 
-  const filteredOrders = useMemo(
-    () => (ordersData ?? []).filter((o) => o.status !== "served"),
-    [ordersData]
-  );
-
-  /* ✅ Stable callbacks */
   const handleView = useCallback(
     (order) => setViewOrder(order),
     [setViewOrder]
   );
-
   const handleNext = useCallback(
     (order) => {
       const id = order.order_id ?? order.id;
@@ -237,10 +229,8 @@ export default function OrdersPanel() {
   );
 
   useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.scrollTop = 0;
-    }
-  }, [ordersData]);
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+  }, [filteredOrders]);
 
   return (
     <div className="p-4 w-full max-w-5xl mx-auto">
@@ -248,7 +238,6 @@ export default function OrdersPanel() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
           <h3 className="font-semibold text-lg">Orders</h3>
-
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="flex-shrink-0 w-full sm:w-36">
               <Select
@@ -266,7 +255,6 @@ export default function OrdersPanel() {
                 </SelectContent>
               </Select>
             </div>
-
             <div className="flex-1 min-w-0">
               <Input
                 placeholder="Search orders..."
@@ -278,17 +266,17 @@ export default function OrdersPanel() {
           </div>
         </div>
 
-        {/* Desktop */}
+        {/* Desktop Table */}
         {!showOrdersPanel && (
           <div
             ref={contentRef}
-            className="hidden md:block overflow-y-auto overflow-x-hidden"
+            className="hidden md:block overflow-y-auto"
             style={{ maxHeight: "48vh" }}
           >
             {isLoading ? (
               <div className="flex justify-center items-center py-6 text-gray-500">
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                Loading orders...
+                <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading
+                orders...
               </div>
             ) : (
               <table className="w-full table-fixed text-sm">
@@ -359,7 +347,6 @@ export default function OrdersPanel() {
                   Close
                 </Button>
               </div>
-
               {filteredOrders.length === 0 ? (
                 <div className="text-center text-gray-500 py-6">
                   No active orders

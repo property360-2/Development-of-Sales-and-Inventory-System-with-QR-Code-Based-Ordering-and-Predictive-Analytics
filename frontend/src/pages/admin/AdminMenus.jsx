@@ -24,7 +24,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
 import { Search, Eye } from "lucide-react";
-import * as HoverCard from "@radix-ui/react-hover-card"; // 👈 import HoverCard
+import * as HoverCard from "@radix-ui/react-hover-card";
 
 // -----------------------
 // Menu Add/Edit Modal
@@ -85,7 +85,7 @@ function MenuModal({ isOpen, onClose, initialData, onSubmit }) {
             }
             required
           />
-          {/* Category (Select instead of Input) */}
+
           <Select
             value={formData.category}
             onValueChange={(value) =>
@@ -111,7 +111,6 @@ function MenuModal({ isOpen, onClose, initialData, onSubmit }) {
             }
           />
 
-          {/* Availability */}
           <label className="flex items-center gap-2 mt-2">
             <input
               type="checkbox"
@@ -139,6 +138,10 @@ function MenuModal({ isOpen, onClose, initialData, onSubmit }) {
     </Dialog.Root>
   );
 }
+
+// -----------------------
+// View Modal
+// -----------------------
 function ViewMenuModal({ isOpen, onClose, menu }) {
   if (!menu) return null;
 
@@ -158,7 +161,8 @@ function ViewMenuModal({ isOpen, onClose, menu }) {
             <span className="font-semibold">Category:</span> {menu.category}
           </p>
           <p>
-            <span className="font-semibold">Price:</span> ₱{menu.price}
+            <span className="font-semibold">Price:</span> ₱
+            {Number(menu.price).toFixed(2)}
           </p>
           <p>
             <span className="font-semibold">Available:</span>{" "}
@@ -172,15 +176,6 @@ function ViewMenuModal({ isOpen, onClose, menu }) {
             <span className="font-semibold">Details:</span>{" "}
             {menu.product_details || "—"}
           </p>
-          <p>
-            <span className="font-semibold">Last time updated:</span>{" "}
-            {menu.updated_at
-              ? new Date(menu.updated_at).toLocaleString("en-PH", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })
-              : "—"}
-          </p>
         </div>
 
         <div className="flex justify-end mt-6">
@@ -190,6 +185,7 @@ function ViewMenuModal({ isOpen, onClose, menu }) {
     </Dialog.Root>
   );
 }
+
 // -----------------------
 // Confirm Delete Modal
 // -----------------------
@@ -223,28 +219,26 @@ export default function AdminMenus() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
   const [viewData, setViewData] = useState(null);
 
   const queryClient = useQueryClient();
 
   // -----------------------
-  // Fetch menus with pagination
+  // Fetch all menus (no pagination)
   // -----------------------
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["menus", page, perPage],
+  const {
+    data: menus = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["menus"],
     queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/menus?page=${page}&per_page=${perPage}`
-      );
-      return res.data;
+      const res = await axiosInstance.get("/menus");
+      return Array.isArray(res.data) ? res.data : res.data?.data ?? [];
     },
-    keepPreviousData: true,
+    staleTime: 5000,
   });
 
-  const menus = data?.data || [];
-  const meta = data;
   // -----------------------
   // Debounce search
   // -----------------------
@@ -266,7 +260,7 @@ export default function AdminMenus() {
   );
 
   // -----------------------
-  // Mutations (with fixed toast)
+  // Mutations
   // -----------------------
   const addMenuMutation = useMutation({
     mutationFn: (newMenu) => axiosInstance.post("/menus", newMenu),
@@ -321,7 +315,7 @@ export default function AdminMenus() {
             placeholder="Search menus..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8" // add padding-left para di mag-overlap sa icon
+            className="pl-8"
           />
         </div>
 
@@ -332,6 +326,8 @@ export default function AdminMenus() {
           <SelectContent>
             <SelectItem value="food">Food</SelectItem>
             <SelectItem value="beverages">Beverages</SelectItem>
+            <SelectItem value="dessert">Dessert</SelectItem>
+            <SelectItem value="snack">Snack</SelectItem>
             <SelectItem value="all">All</SelectItem>
           </SelectContent>
         </Select>
@@ -355,16 +351,15 @@ export default function AdminMenus() {
               <TableCell>{menu.menu_id}</TableCell>
               <TableCell>{menu.name}</TableCell>
               <TableCell>{menu.category}</TableCell>
-              <TableCell>{menu.price}</TableCell>
+              <TableCell>₱{Number(menu.price).toFixed(2)}</TableCell>
               <TableCell>{menu.availability_status ? "Yes" : "No"}</TableCell>
               <TableCell className="flex gap-2">
-                {/* 👁 Eye button with hover + click */}
                 <HoverCard.Root>
                   <HoverCard.Trigger asChild>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setViewData(menu)} // full modal on click
+                      onClick={() => setViewData(menu)}
                     >
                       <Eye size={16} />
                     </Button>
@@ -376,15 +371,6 @@ export default function AdminMenus() {
                   >
                     <p className="text-xs text-gray-600">
                       {menu.description || "No description"}
-                    </p>
-                    <p className="text-xs">
-                      Last update:{" "}
-                      {menu.updated_at
-                        ? new Date(menu.updated_at).toLocaleString("en-PH", {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })
-                        : "—"}
                     </p>
                   </HoverCard.Content>
                 </HoverCard.Root>
@@ -402,53 +388,20 @@ export default function AdminMenus() {
               </TableCell>
             </TableRow>
           ))}
+
+          {filteredMenus.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                className="text-center text-sm text-muted-foreground"
+              >
+                No menus found.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
 
-      {/* Pagination Controls */}
-      {meta && (
-        <div className="flex justify-between items-center mt-4">
-          <p>
-            Page {meta.current_page} of {meta.last_page} (Total: {meta.total})
-          </p>
-
-          <div className="flex items-center gap-4">
-            {/* Page Size Dropdown */}
-            <Select
-              value={String(perPage)}
-              onValueChange={(value) => {
-                setPerPage(Number(value));
-                setPage(1); // reset to first page
-              }}
-            >
-              <SelectTrigger className="w-28">
-                <SelectValue placeholder="Per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10 per page</SelectItem>
-                <SelectItem value="20">20 per page</SelectItem>
-                <SelectItem value="50">50 per page</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Prev/Next */}
-            <div className="flex gap-2">
-              <Button
-                disabled={meta.current_page === 1}
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              >
-                Previous
-              </Button>
-              <Button
-                disabled={meta.current_page === meta.last_page}
-                onClick={() => setPage((prev) => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
       {viewData && (
         <ViewMenuModal
           isOpen={!!viewData}
@@ -457,7 +410,6 @@ export default function AdminMenus() {
         />
       )}
 
-      {/* Modals (unchanged) */}
       {addOpen && (
         <MenuModal
           isOpen={addOpen}

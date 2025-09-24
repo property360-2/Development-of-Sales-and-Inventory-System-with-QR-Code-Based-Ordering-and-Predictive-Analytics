@@ -1,5 +1,5 @@
 // frontend/src/pages/cashier/components/MenuGrid.jsx
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../../api/axiosInstance";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,13 +17,9 @@ import { Search } from "lucide-react";
 
 const CATEGORIES = ["all", "food", "beverages", "dessert", "snack"];
 
-// ✅ Memoized Card Component
 const MenuCard = React.memo(function MenuCard({ item, onAdd }) {
   return (
-    <Card
-      key={item.menu_id ?? item.id}
-      className="rounded-xl shadow hover:shadow-lg transition overflow-hidden"
-    >
+    <Card className="rounded-xl shadow hover:shadow-lg transition overflow-hidden">
       <CardContent className="flex flex-col items-center p-4">
         <div className="text-center">
           <div className="font-semibold text-lg">{item.name}</div>
@@ -42,29 +38,22 @@ const MenuCard = React.memo(function MenuCard({ item, onAdd }) {
 
 export default function MenuGrid() {
   const addToCart = usePOSStore((s) => s.addToCart);
-  const [page, setPage] = useState(1);
-  const [perPage] = useState(24);
-
   const search = usePOSStore((s) => s.search);
   const selectedCategory = usePOSStore((s) => s.selectedCategory);
   const setSearch = usePOSStore((s) => s.setSearch);
   const setSelectedCategory = usePOSStore((s) => s.setSelectedCategory);
 
-  // ✅ Stable callback to prevent re-renders
   const handleAdd = useCallback((item) => addToCart(item), [addToCart]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["menus", page, perPage],
+    queryKey: ["menus"],
     queryFn: async () => {
-      const res = await axiosInstance.get(
-        `/menus?page=${page}&per_page=${perPage}`
-      );
-      return res.data ?? {};
+      const res = await axiosInstance.get("/menus");
+      return res.data ?? [];
     },
-    keepPreviousData: true,
   });
 
-  const menus = data?.data ?? [];
+  const menus = data ?? [];
   const filteredMenus = useMemo(() => {
     return menus.filter((m) => {
       const byCat =
@@ -80,9 +69,8 @@ export default function MenuGrid() {
 
   return (
     <div className="w-full">
-      {/* Filters row */}
+      {/* Filters */}
       <div className="flex items-center gap-3 mb-6 w-full max-w-md">
-        {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-60" />
           <Input
@@ -93,7 +81,6 @@ export default function MenuGrid() {
           />
         </div>
 
-        {/* Category select */}
         <div className="w-36">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full">
@@ -116,29 +103,6 @@ export default function MenuGrid() {
           <MenuCard key={m.menu_id ?? m.id} item={m} onAdd={handleAdd} />
         ))}
       </div>
-
-      {/* Pagination */}
-      {data && data.last_page > 1 && (
-        <div className="flex justify-between mt-6">
-          <Button
-            disabled={!data.prev_page_url}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            variant="outline"
-          >
-            Prev
-          </Button>
-          <span className="text-sm">
-            Page {data.current_page} of {data.last_page}
-          </span>
-          <Button
-            disabled={!data.next_page_url}
-            onClick={() => setPage((p) => p + 1)}
-            variant="outline"
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
