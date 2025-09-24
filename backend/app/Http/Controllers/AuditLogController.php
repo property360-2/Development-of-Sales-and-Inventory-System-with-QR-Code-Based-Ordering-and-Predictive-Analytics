@@ -12,11 +12,9 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 20); // default 20
-
         $logs = AuditLog::with('user:user_id,name,role') // fixed PK
             ->select('log_id', 'user_id', 'action', 'timestamp')
-            ->paginate($perPage);
+            ->get(); // fetch all records, no pagination
 
         return response()->json($logs);
     }

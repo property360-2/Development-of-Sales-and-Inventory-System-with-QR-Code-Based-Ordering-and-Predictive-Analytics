@@ -5,13 +5,7 @@ import useAuthStore from "../../stores/useAuthStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import {
-  LogOut,
-  ShoppingCart,
-  CreditCard,
-  Receipt,
-  ListChecks,
-} from "lucide-react";
+import { LogOut, ShoppingCart, ListChecks } from "lucide-react";
 
 export default function CashierDashboard() {
   const { user, logout } = useAuthStore();
@@ -59,7 +53,7 @@ export default function CashierDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <motion.div whileHover={{ scale: 1.05 }}>
           <Card
             onClick={() => navigate("/cashier/pos")}
@@ -85,36 +79,6 @@ export default function CashierDashboard() {
               <h2 className="font-bold text-lg">Orders</h2>
               <p className="text-gray-500 text-sm mt-2">
                 View & update QR and cashier orders.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Card
-            onClick={() => navigate("/cashier/payments")}
-            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
-          >
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <CreditCard className="text-purple-600 mb-3" size={36} />
-              <h2 className="font-bold text-lg">Payments</h2>
-              <p className="text-gray-500 text-sm mt-2">
-                Handle customer payments & status.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Card
-            onClick={() => navigate("/cashier/receipts")}
-            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
-          >
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <Receipt className="text-orange-600 mb-3" size={36} />
-              <h2 className="font-bold text-lg">Receipts</h2>
-              <p className="text-gray-500 text-sm mt-2">
-                View and print customer receipts.
               </p>
             </CardContent>
           </Card>

@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::select('user_id','username', 'name','role', 'created_at','contact_number')
-            ->paginate(20);
+            ->get();
 
         $userId = Auth::id();
         // if ($userId) {

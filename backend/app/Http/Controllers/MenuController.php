@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
-use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\Store\StoreMenuRequest;
@@ -11,11 +10,9 @@ use App\Http\Requests\Update\UpdateMenuRequest;
 
 class MenuController extends Controller
 {
-    // List all menus
+    // List all menus (no pagination)
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 20); // default 20 per page
-
         $menus = Menu::select(
             'menu_id',
             'name',
@@ -26,9 +23,8 @@ class MenuController extends Controller
             'product_details',
             'updated_at'
         )
-            ->orderBy('menu_id', 'desc') // ✅ tamang paraan
-            ->paginate($perPage);
-
+            ->orderBy('menu_id', 'desc') // keep ordering
+            ->get(); // fetch all menus
 
         $userId = Auth::id();
         if (!$userId) {
@@ -37,13 +33,12 @@ class MenuController extends Controller
 
         // AuditLog::create([
         //     'user_id' => $userId,
-        //     'action' => 'Viewed all menus (per_page=' . $perPage . ')',
+        //     'action' => 'Viewed all menus',
         //     'timestamp' => now(),
         // ]);
 
         return response()->json($menus);
     }
-
 
     // Show a single menu item
     public function show($id)
@@ -65,8 +60,6 @@ class MenuController extends Controller
         return response()->json($menu);
     }
 
-
-
     // Create a new menu
     public function store(StoreMenuRequest $request)
     {
@@ -79,11 +72,9 @@ class MenuController extends Controller
     {
         $menu = Menu::findOrFail($id);
         $menu->fill($request->validated());
-
-        $menu->save(); // triggers the updated event
+        $menu->save(); // triggers updated event
         return response()->json($menu);
     }
-
 
     // Delete a menu
     public function destroy($id)

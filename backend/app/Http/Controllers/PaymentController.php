@@ -23,7 +23,7 @@ class PaymentController extends Controller
             'order:order_id,customer_id,total_amount,status,order_timestamp'
         ])
             ->select('payment_id', 'order_id', 'amount_paid', 'payment_method', 'payment_status', 'payment_timestamp')
-            ->paginate($perPage);
+            ->get();
 
         $userId = Auth::id();
         if (!$userId) {

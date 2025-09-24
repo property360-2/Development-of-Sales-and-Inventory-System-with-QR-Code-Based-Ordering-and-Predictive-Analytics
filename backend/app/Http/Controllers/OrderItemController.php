@@ -21,7 +21,7 @@ class OrderItemController extends Controller
             'menu:id,menu_id,name,price'
         ])
             ->select('order_item_id', 'order_id', 'menu_id', 'quantity', 'price')
-            ->paginate($perPage);
+            ->get();
 
         return response()->json($orderItems);
     }

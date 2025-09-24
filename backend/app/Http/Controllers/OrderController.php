@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Store\StoreOrderRequest;
@@ -13,12 +12,10 @@ use App\Http\Requests\Update\UpdateOrderRequest;
 class OrderController extends Controller
 {
     /**
-     * Display a listing of all orders with related data.
+     * Display a listing of all orders with related data (no pagination).
      */
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 20);
-
         $orders = Order::with([
             'customer:customer_id,customer_name,table_number,order_reference',
             'user:user_id,name,role',
@@ -26,7 +23,7 @@ class OrderController extends Controller
             'payments:payment_id,order_id,amount_paid,payment_method,payment_status'
         ])
             ->select('order_id', 'customer_id', 'handled_by', 'status', 'total_amount', 'order_timestamp', 'order_source')
-            ->paginate($perPage);
+            ->get(); // fetch all orders
 
         $userId = Auth::id();
         if (!$userId) {

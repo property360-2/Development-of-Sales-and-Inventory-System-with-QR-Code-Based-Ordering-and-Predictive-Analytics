@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\Store\StoreCustomerRequest;
@@ -12,17 +11,14 @@ use App\Http\Requests\Update\UpdateCustomerRequest;
 class CustomerController extends Controller
 {
     /**
-     * Display all customers
+     * Display all customers (no pagination)
      */
     public function index(Request $request)
     {
-        // default 20, pero pwede i-set sa query param
-        $perPage = $request->input('per_page', 20);
-
         $customers = Customer::select('customer_id', 'customer_name', 'table_number', 'order_reference')
-            ->paginate($perPage);
+            ->get(); // fetch all customers at once
 
-        // Log "view all" action
+        // Log "view all" action (optional)
         $userId = Auth::id();
         if (!$userId) {
             abort(403, 'Unauthorized');
@@ -30,13 +26,12 @@ class CustomerController extends Controller
 
         // AuditLog::create([
         //     'user_id' => $userId,
-        //     'action' => 'Viewed all Customers (per_page=' . $perPage . ')',
+        //     'action' => 'Viewed all Customers',
         //     'timestamp' => now(),
         // ]);
 
         return response()->json($customers);
     }
-
 
     /**
      * Store a new customer
@@ -56,7 +51,7 @@ class CustomerController extends Controller
 
         $userId = Auth::id();
         if (!$userId) {
-            abort(403, 'Unauthorized'); // don’t log anything if no user
+            abort(403, 'Unauthorized');
         }
 
         // AuditLog::create([
@@ -64,7 +59,6 @@ class CustomerController extends Controller
         //     'action' => 'Viewed Customer: ' . $customer->customer_id,
         //     'timestamp' => now(),
         // ]);
-
 
         return response()->json($customer);
     }
