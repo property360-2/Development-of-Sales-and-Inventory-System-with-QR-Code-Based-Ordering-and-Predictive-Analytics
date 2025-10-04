@@ -3,7 +3,6 @@ import { create } from "zustand";
 import axiosInstance from "../api/axiosInstance";
 
 const useAuthStore = create((set) => ({
-
     user: null,
     token: null,
     loading: true,
@@ -12,19 +11,14 @@ const useAuthStore = create((set) => ({
     initialize: async () => {
         console.log("🔄 Initializing auth...");
         const token = localStorage.getItem("authToken");
-        const userData = localStorage.getItem("userData"); // ✅ full user saved
+        const userData = localStorage.getItem("userData");
 
         if (token && userData) {
             const user = JSON.parse(userData);
             console.log("✅ Restoring session:", user);
 
-            // set axios header immediately
             axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            set({
-                token,
-                user,
-                loading: false,
-            });
+            set({ token, user, loading: false });
         } else {
             set({ loading: false });
         }
@@ -37,7 +31,7 @@ const useAuthStore = create((set) => ({
 
             set({ token, user, error: null });
             localStorage.setItem("authToken", token);
-            localStorage.setItem("userData", JSON.stringify(user)); // ✅ store full user
+            localStorage.setItem("userData", JSON.stringify(user));
 
             axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
@@ -48,11 +42,35 @@ const useAuthStore = create((set) => ({
         }
     },
 
+    // ✅ Updated logout with backend call
     logout: async () => {
-        set({ user: null, token: null });
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userData"); // ✅ clear full user
-        delete axiosInstance.defaults.headers.common["Authorization"];
+        try {
+            // Call backend to revoke token
+            await axiosInstance.post("/logout");
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Continue logout even if API fails
+        } finally {
+            // Clear local state
+            set({ user: null, token: null });
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("userData");
+            delete axiosInstance.defaults.headers.common["Authorization"];
+        }
+    },
+
+    // ✅ New: Logout from all devices
+    logoutAll: async () => {
+        try {
+            await axiosInstance.post("/logout-all");
+        } catch (error) {
+            console.error("Logout all error:", error);
+        } finally {
+            set({ user: null, token: null });
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("userData");
+            delete axiosInstance.defaults.headers.common["Authorization"];
+        }
     },
 }));
 

@@ -8,6 +8,11 @@ import OrdersPanel from "./components/OrdersPanel";
 import OrderDetailModal from "./components/OrderDetailModal";
 import PaymentDialog from "./components/PaymentDialog";
 
+
+import ReceiptGenerator from '@/components/ReceiptGenerator';
+
+// In your order view modal:
+<ReceiptGenerator order={selectedOrder} onClose={() => setViewOrder(null)} />
 export default function CashierPOS() {
   return (
     <div className="min-h-screen p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">

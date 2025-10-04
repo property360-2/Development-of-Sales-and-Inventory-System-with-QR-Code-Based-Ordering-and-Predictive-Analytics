@@ -2,7 +2,10 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../api/axiosInstance";
+import ReceiptGenerator from '@/components/ReceiptGenerator';
 
+// In your order view modal:
+<ReceiptGenerator order={selectedOrder} onClose={() => setViewOrder(null)} />
 import {
   Table,
   TableBody,

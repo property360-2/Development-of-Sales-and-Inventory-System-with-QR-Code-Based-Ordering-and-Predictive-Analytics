@@ -66,3 +66,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('menus/{id}', [MenuController::class, 'show']);
     });
 });
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout-all', [AuthController::class, 'logoutAll']);
+});
