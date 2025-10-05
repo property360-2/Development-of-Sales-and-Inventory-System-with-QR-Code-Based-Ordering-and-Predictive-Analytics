@@ -1,4 +1,3 @@
-// src/pages/admin/AdminDashboard.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../../stores/useAuthStore";
@@ -12,6 +11,10 @@ import {
   LogOut,
   Quote,
   UserCircle,
+  BarChart3,
+  TrendingUp,
+  Package,
+  ClipboardList,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -20,14 +23,14 @@ export default function AdminDashboard() {
   const [quote, setQuote] = useState("");
 
   const quotes = [
-    "Leadership is not about being in charge. It’s about taking care of those in your charge.",
-    "Great leaders don’t set out to be a leader, they set out to make a difference.",
+    "Leadership is not about being in charge. It's about taking care of those in your charge.",
+    "Great leaders don't set out to be a leader, they set out to make a difference.",
     "Teamwork makes the dream work.",
     "Good management is the art of making problems so interesting that everyone wants to deal with them.",
     "Efficiency is doing things right; effectiveness is doing the right things.",
     "A goal without a plan is just a wish.",
     "Small daily improvements lead to stunning results.",
-    "Don’t just manage—lead, inspire, and empower.",
+    "Don't just manage—lead, inspire, and empower.",
   ];
 
   // Redirect if not logged in or not admin
@@ -47,6 +50,61 @@ export default function AdminDashboard() {
     await logout();
     navigate("/login");
   };
+
+  const managementCards = [
+    {
+      title: "Manage Menus",
+      description: "Add, view, and organize food & drinks.",
+      icon: Utensils,
+      color: "text-green-600",
+      path: "/admin/menus",
+    },
+    {
+      title: "User Management",
+      description: "Create, view, and manage system users.",
+      icon: Users,
+      color: "text-blue-600",
+      path: "/admin/users",
+    },
+    {
+      title: "Customer Management",
+      description: "View customer insights and statistics.",
+      icon: UserCircle,
+      color: "text-orange-600",
+      path: "/admin/customers",
+    },
+    {
+      title: "Audit Logs",
+      description: "Review activity and system history.",
+      icon: ClipboardList,
+      color: "text-purple-600",
+      path: "/admin/logs",
+    },
+  ];
+
+  const analyticsCards = [
+    {
+      title: "Sales Analysis",
+      description: "View revenue trends and top items.",
+      icon: BarChart3,
+      color: "text-cyan-600",
+      path: "/admin/sales-analysis",
+    },
+    {
+      title: "Predictive Analysis",
+      description: "7-day sales forecast with AI insights.",
+      icon: TrendingUp,
+      color: "text-emerald-600",
+      path: "/admin/predictive-analysis",
+    },
+    {
+      title: "Inventory Management",
+      description: "Track stock levels and alerts.",
+      icon: Package,
+      color: "text-amber-600",
+      path: "/admin/inventory",
+    },
+  ];
 
   return (
     <div className="p-8 min-h-screen bg-gray-50">
@@ -78,67 +136,54 @@ export default function AdminDashboard() {
         <p className="text-gray-600 italic">{quote}</p>
       </motion.div>
 
-      {/* Quick Actions / Management Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Card
-            onClick={() => navigate("/admin/menus")}
-            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
-          >
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <Utensils className="text-green-600 mb-3" size={36} />
-              <h2 className="font-bold text-lg">Manage Menus</h2>
-              <p className="text-gray-500 text-sm mt-2">
-                Add, view, and organize food & drinks.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* Management Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-700 mb-4">
+          Core Management
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {managementCards.map((card, index) => (
+            <motion.div key={index} whileHover={{ scale: 1.05 }}>
+              <Card
+                onClick={() => navigate(card.path)}
+                className="cursor-pointer hover:shadow-lg transition rounded-2xl"
+              >
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <card.icon className={`${card.color} mb-3`} size={36} />
+                  <h2 className="font-bold text-lg">{card.title}</h2>
+                  <p className="text-gray-500 text-sm mt-2">
+                    {card.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </div>
 
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Card
-            onClick={() => navigate("/admin/users")}
-            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
-          >
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <Users className="text-blue-600 mb-3" size={36} />
-              <h2 className="font-bold text-lg">User Management</h2>
-              <p className="text-gray-500 text-sm mt-2">
-                Create, view, and manage system users.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Card
-            onClick={() => navigate("/admin/customers")}
-            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
-          >
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <UserCircle className="text-orange-600 mb-3" size={36} />
-              <h2 className="font-bold text-lg">Customer Management</h2>
-              <p className="text-gray-500 text-sm mt-2">
-                View and manage customer records.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div whileHover={{ scale: 1.05 }}>
-          <Card
-            onClick={() => navigate("/admin/logs")}
-            className="cursor-pointer hover:shadow-lg transition rounded-2xl"
-          >
-            <CardContent className="p-6 flex flex-col items-center text-center">
-              <BookOpen className="text-purple-600 mb-3" size={36} />
-              <h2 className="font-bold text-lg">Audit Logs</h2>
-              <p className="text-gray-500 text-sm mt-2">
-                Review activity and system history.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* Analytics Section */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-700 mb-4">
+          Analytics & Insights
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {analyticsCards.map((card, index) => (
+            <motion.div key={index} whileHover={{ scale: 1.05 }}>
+              <Card
+                onClick={() => navigate(card.path)}
+                className="cursor-pointer hover:shadow-lg transition rounded-2xl"
+              >
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <card.icon className={`${card.color} mb-3`} size={36} />
+                  <h2 className="font-bold text-lg">{card.title}</h2>
+                  <p className="text-gray-500 text-sm mt-2">
+                    {card.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

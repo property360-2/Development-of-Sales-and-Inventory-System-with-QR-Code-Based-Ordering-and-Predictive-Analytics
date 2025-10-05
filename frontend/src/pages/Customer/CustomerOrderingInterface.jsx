@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "../../api/axiosInstance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,73 +39,18 @@ const QROrderingInterface = () => {
     if (table) setTableNumber(table);
   }, []);
 
-  // Sample menu items (would come from API)
-  const menuItems = [
-    {
-      id: 1,
-      name: "Chicken Adobo",
-      price: 120,
-      category: "food",
-      description: "Classic Filipino chicken adobo",
-      available: true,
+  // Fetch menu items from API
+  const {
+    data: menuItems = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["menus"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/menus");
+      return (res.data || []).filter((item) => item.availability_status);
     },
-    {
-      id: 2,
-      name: "Sinigang na Baboy",
-      price: 150,
-      category: "food",
-      description: "Sour pork soup",
-      available: true,
-    },
-    {
-      id: 3,
-      name: "Kare-Kare",
-      price: 180,
-      category: "food",
-      description: "Oxtail in peanut sauce",
-      available: true,
-    },
-    {
-      id: 4,
-      name: "Iced Tea",
-      price: 35,
-      category: "beverages",
-      description: "Fresh brewed iced tea",
-      available: true,
-    },
-    {
-      id: 5,
-      name: "Mango Shake",
-      price: 65,
-      category: "beverages",
-      description: "Fresh mango smoothie",
-      available: true,
-    },
-    {
-      id: 6,
-      name: "Halo-Halo",
-      price: 85,
-      category: "dessert",
-      description: "Filipino shaved ice dessert",
-      available: true,
-    },
-    {
-      id: 7,
-      name: "Leche Flan",
-      price: 70,
-      category: "dessert",
-      description: "Creamy caramel custard",
-      available: true,
-    },
-    {
-      id: 8,
-      name: "Lumpia",
-      price: 45,
-      category: "snack",
-      description: "Filipino spring rolls",
-      available: true,
-    },
-  ];
+  });
 
   const categories = ["all", "food", "beverages", "dessert", "snack"];
 
@@ -113,11 +60,11 @@ const QROrderingInterface = () => {
       : menuItems.filter((item) => item.category === selectedCategory);
 
   const addToCart = (item) => {
-    const existing = cart.find((i) => i.id === item.id);
+    const existing = cart.find((i) => i.menu_id === item.menu_id);
     if (existing) {
       setCart(
         cart.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.menu_id === item.menu_id ? { ...i, quantity: i.quantity + 1 } : i
         )
       );
     } else {
@@ -129,7 +76,7 @@ const QROrderingInterface = () => {
     setCart(
       cart
         .map((item) =>
-          item.id === id
+          item.menu_id === id
             ? { ...item, quantity: Math.max(0, item.quantity + delta) }
             : item
         )
@@ -138,7 +85,7 @@ const QROrderingInterface = () => {
   };
 
   const removeItem = (id) => {
-    setCart(cart.filter((item) => item.id !== id));
+    setCart(cart.filter((item) => item.menu_id !== id));
   };
 
   const cartTotal = cart.reduce(
@@ -148,29 +95,52 @@ const QROrderingInterface = () => {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleSubmitOrder = async () => {
-    // Generate order reference
-    const ref = `QR-${tableNumber}-${Date.now()}`;
-    setOrderReference(ref);
+    try {
+      // Generate order reference
+      const ref = `QR-${tableNumber}-${Date.now()}`;
+      setOrderReference(ref);
 
-    // In real app, would call API:
-    // await axiosInstance.post('/customers', {
-    //   customer_name: customerName || 'Guest',
-    //   table_number: tableNumber,
-    //   order_reference: ref
-    // });
+      // Create customer record
+      await axiosInstance.post("/customers", {
+        customer_name: customerName || "Guest",
+        table_number: tableNumber,
+        order_reference: ref,
+      });
 
-    // Show confirmation
-    setOrderSubmitted(true);
+      // Show confirmation
+      setOrderSubmitted(true);
 
-    // Clear cart after 3 seconds
-    setTimeout(() => {
-      setCart([]);
-      setCustomerName("");
-      setOrderSubmitted(false);
-    }, 3000);
+      // Clear cart after 3 seconds
+      setTimeout(() => {
+        setCart([]);
+        setCustomerName("");
+        setOrderSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to submit order:", error);
+      alert("Failed to submit order. Please try again.");
+    }
   };
 
   const formatMoney = (amount) => `₱${Number(amount).toFixed(2)}`;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg">Loading menu...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-red-500">
+          Error loading menu. Please refresh.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 p-4">
@@ -233,7 +203,7 @@ const QROrderingInterface = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filteredMenu.map((item) => (
                 <Card
-                  key={item.id}
+                  key={item.menu_id}
                   className="hover:shadow-lg transition cursor-pointer"
                 >
                   <CardContent className="p-4">
@@ -256,7 +226,6 @@ const QROrderingInterface = () => {
                       className="w-full mt-3"
                       size="sm"
                       onClick={() => addToCart(item)}
-                      disabled={!item.available}
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add to Order
@@ -264,6 +233,12 @@ const QROrderingInterface = () => {
                   </CardContent>
                 </Card>
               ))}
+
+              {filteredMenu.length === 0 && (
+                <div className="col-span-2 text-center text-gray-500 py-8">
+                  No items available in this category.
+                </div>
+              )}
             </div>
           </div>
 
@@ -287,7 +262,7 @@ const QROrderingInterface = () => {
                     <div className="space-y-3">
                       {cart.map((item) => (
                         <div
-                          key={item.id}
+                          key={item.menu_id}
                           className="flex items-start gap-2 pb-3 border-b"
                         >
                           <div className="flex-1">
@@ -302,7 +277,7 @@ const QROrderingInterface = () => {
                               size="icon"
                               variant="outline"
                               className="h-6 w-6"
-                              onClick={() => updateQuantity(item.id, -1)}
+                              onClick={() => updateQuantity(item.menu_id, -1)}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -313,7 +288,7 @@ const QROrderingInterface = () => {
                               size="icon"
                               variant="outline"
                               className="h-6 w-6"
-                              onClick={() => updateQuantity(item.id, 1)}
+                              onClick={() => updateQuantity(item.menu_id, 1)}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -321,7 +296,7 @@ const QROrderingInterface = () => {
                               size="icon"
                               variant="ghost"
                               className="h-6 w-6 ml-1"
-                              onClick={() => removeItem(item.id)}
+                              onClick={() => removeItem(item.menu_id)}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>

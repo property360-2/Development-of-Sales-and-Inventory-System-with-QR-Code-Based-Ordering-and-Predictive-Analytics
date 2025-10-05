@@ -7,6 +7,10 @@ import {
   Users,
   FileText,
   ClipboardList,
+  TrendingUp,
+  Package,
+  UserCircle,
+  BarChart3,
 } from "lucide-react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import useAuthStore from "../stores/useAuthStore";
@@ -26,7 +30,15 @@ export default function AdminLayout() {
     { name: "Dashboard", path: "/admin", icon: FileText },
     { name: "Menus", path: "/admin/menus", icon: ShoppingCart },
     { name: "Users", path: "/admin/users", icon: Users },
+    { name: "Customers", path: "/admin/customers", icon: UserCircle },
     { name: "Audit Logs", path: "/admin/logs", icon: ClipboardList },
+    { name: "Sales Analysis", path: "/admin/sales-analysis", icon: BarChart3 },
+    {
+      name: "Predictive Analysis",
+      path: "/admin/predictive-analysis",
+      icon: TrendingUp,
+    },
+    { name: "Inventory", path: "/admin/inventory", icon: Package },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -44,7 +56,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex space-x-6 items-center">
+        <nav className="hidden md:flex space-x-4 items-center">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (

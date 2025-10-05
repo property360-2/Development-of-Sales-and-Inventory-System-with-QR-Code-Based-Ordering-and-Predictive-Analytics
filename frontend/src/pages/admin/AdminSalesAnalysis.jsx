@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "../../api/axiosInstance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -31,13 +33,26 @@ import {
   Package,
 } from "lucide-react";
 
-const AnalyticsDashboard = ({
-  orders = [],
-  payments = [],
-  menus = [],
-  customers = [],
-}) => {
+export default function AdminSalesAnalysis() {
   const [timeRange, setTimeRange] = React.useState("7days");
+
+  // Fetch all data
+  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ["orders"],
+    queryFn: async () => (await axiosInstance.get("/orders")).data,
+  });
+
+  const { data: payments = [], isLoading: paymentsLoading } = useQuery({
+    queryKey: ["payments"],
+    queryFn: async () => (await axiosInstance.get("/payments")).data,
+  });
+
+  const { data: menus = [], isLoading: menusLoading } = useQuery({
+    queryKey: ["menus"],
+    queryFn: async () => (await axiosInstance.get("/menus")).data,
+  });
+
+  const isLoading = ordersLoading || paymentsLoading || menusLoading;
 
   // Filter data by time range
   const filteredOrders = useMemo(() => {
@@ -69,7 +84,7 @@ const AnalyticsDashboard = ({
       .size;
 
     // Calculate growth (compare with previous period)
-    const halfwayPoint = filteredOrders.length / 2;
+    const halfwayPoint = Math.floor(filteredOrders.length / 2);
     const recentRevenue = filteredOrders
       .slice(0, halfwayPoint)
       .reduce((sum, o) => sum + Number(o.total_amount), 0);
@@ -111,7 +126,7 @@ const AnalyticsDashboard = ({
     const itemSales = {};
     filteredOrders.forEach((order) => {
       (order.items || order.order_items || []).forEach((item) => {
-        const name = item.menu?.name || item.name;
+        const name = item.menu?.name || item.name || "Unknown";
         if (!itemSales[name]) {
           itemSales[name] = { name, quantity: 0, revenue: 0 };
         }
@@ -154,6 +169,14 @@ const AnalyticsDashboard = ({
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 
   const formatMoney = (value) => `₱${Number(value).toFixed(2)}`;
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <p>Loading analytics data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-gray-50">
@@ -348,55 +371,5 @@ const AnalyticsDashboard = ({
         </Card>
       </div>
     </div>
-  );
-};
-
-// Demo with sample data
-export default function App() {
-  const sampleOrders = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    return {
-      order_id: i + 1,
-      total_amount: Math.random() * 500 + 100,
-      order_timestamp: date.toISOString(),
-      customer_id: Math.floor(Math.random() * 10) + 1,
-      items: [
-        {
-          menu_id: 1,
-          name: "Adobo",
-          quantity: Math.floor(Math.random() * 3) + 1,
-          price: 120,
-        },
-        {
-          menu_id: 2,
-          name: "Sinigang",
-          quantity: Math.floor(Math.random() * 2) + 1,
-          price: 150,
-        },
-      ],
-    };
-  });
-
-  const sampleMenus = [
-    { menu_id: 1, name: "Adobo", category: "food" },
-    { menu_id: 2, name: "Sinigang", category: "food" },
-    { menu_id: 3, name: "Iced Tea", category: "beverages" },
-  ];
-
-  const samplePayments = sampleOrders.map((order) => ({
-    payment_id: order.order_id,
-    order_id: order.order_id,
-    amount_paid: order.total_amount,
-    payment_method: ["cash", "card", "gcash"][Math.floor(Math.random() * 3)],
-  }));
-
-  return (
-    <AnalyticsDashboard
-      orders={sampleOrders}
-      payments={samplePayments}
-      menus={sampleMenus}
-      customers={[]}
-    />
   );
 }

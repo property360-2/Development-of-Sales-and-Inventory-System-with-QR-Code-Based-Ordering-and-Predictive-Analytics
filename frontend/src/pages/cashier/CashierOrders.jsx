@@ -2,10 +2,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../api/axiosInstance";
-import ReceiptGenerator from '@/components/ReceiptGenerator';
+import ReceiptGenerator from "../../components/ReceiptGenerator";
 
-// In your order view modal:
-<ReceiptGenerator order={selectedOrder} onClose={() => setViewOrder(null)} />
 import {
   Table,
   TableBody,
@@ -23,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, Printer } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as HoverCard from "@radix-ui/react-hover-card";
 
@@ -101,6 +99,7 @@ export default function CashierOrders() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [viewOrder, setViewOrder] = useState(null);
+  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState(null); // ✅ For receipt
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all"); // Today / Last7 / Last30 / All
@@ -142,8 +141,10 @@ export default function CashierOrders() {
       return {
         ...order,
         customer_name: customer ? customer.customer_name : "—",
+        customer: customer, // ✅ Include full customer object for receipt
         payment_status: payment ? payment.payment_status : "Unpaid",
         payment_method: payment ? payment.payment_method : "—",
+        payments: payment ? [payment] : [], // ✅ For receipt
       };
     });
   }, [ordersQuery.data, paymentsQuery.data, customersQuery.data]);
@@ -205,10 +206,9 @@ export default function CashierOrders() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="Paid">Paid</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Completed">Completed</SelectItem>
-            <SelectItem value="Failed">Failed</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
 
@@ -218,8 +218,9 @@ export default function CashierOrders() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Methods</SelectItem>
-            <SelectItem value="Cash">Cash</SelectItem>
-            <SelectItem value="GCash">GCash</SelectItem>
+            <SelectItem value="cash">Cash</SelectItem>
+            <SelectItem value="gcash">GCash</SelectItem>
+            <SelectItem value="card">Card</SelectItem>
           </SelectContent>
         </Select>
 
@@ -304,6 +305,16 @@ export default function CashierOrders() {
                     <p className="text-xs">Payment: {row.payment_status}</p>
                   </HoverCard.Content>
                 </HoverCard.Root>
+
+                {/* ✅ Print Receipt Button */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setSelectedOrderForReceipt(row)}
+                  title="Print Receipt"
+                >
+                  <Printer size={16} />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
@@ -329,6 +340,12 @@ export default function CashierOrders() {
           order={viewOrder}
         />
       )}
+
+      {/* ✅ Receipt Generator */}
+      <ReceiptGenerator
+        order={selectedOrderForReceipt}
+        onClose={() => setSelectedOrderForReceipt(null)}
+      />
     </div>
   );
 }

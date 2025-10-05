@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "../../api/axiosInstance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart,
@@ -14,7 +16,17 @@ import {
 import { TrendingUp, AlertTriangle, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-const PredictiveAnalytics = ({ orders = [] }) => {
+export default function AdminPredictiveAnalysis() {
+  // Fetch orders from API
+  const {
+    data: orders = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["orders"],
+    queryFn: async () => (await axiosInstance.get("/orders")).data,
+  });
+
   // Simple Moving Average (SMA) for forecasting
   const calculateSMA = (data, period) => {
     if (data.length < period) return null;
@@ -180,6 +192,22 @@ const PredictiveAnalytics = ({ orders = [] }) => {
 
   const formatMoney = (value) => `₱${Number(value).toFixed(2)}`;
 
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <p>Loading predictive analytics...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <p className="text-red-500">Error loading data. Please try again.</p>
+      </div>
+    );
+  }
+
   if (!insights) {
     return (
       <div className="p-6">
@@ -344,7 +372,8 @@ const PredictiveAnalytics = ({ orders = [] }) => {
               const maxSales = Math.max(
                 ...demandByDayOfWeek.map((d) => d.avgSales)
               );
-              const percentage = (day.avgSales / maxSales) * 100;
+              const percentage =
+                maxSales > 0 ? (day.avgSales / maxSales) * 100 : 0;
 
               return (
                 <div key={day.day} className="space-y-1">
@@ -430,24 +459,4 @@ const PredictiveAnalytics = ({ orders = [] }) => {
       </Card>
     </div>
   );
-};
-
-// Demo
-export default function App() {
-  const sampleOrders = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (29 - i));
-
-    // Simulate increasing trend with some randomness
-    const baseSales = 500 + i * 15;
-    const randomVariation = (Math.random() - 0.5) * 200;
-
-    return {
-      order_id: i + 1,
-      total_amount: Math.max(100, baseSales + randomVariation),
-      order_timestamp: date.toISOString(),
-    };
-  });
-
-  return <PredictiveAnalytics orders={sampleOrders} />;
 }
